@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">hamster\'s widgets pack</string>
+    <string name="service_name">hamster\'s monitoring service</string>
+    <string name="option_activity_title">Widget setup</string>
+
+    <string name="wide_clock_4x2_title">1) wide clock 4x2</string>
+    <string name="minimal_clock_title">hw: minimalitic clock</string>
+    <string name="wide_clock_4x1_title">hw: 4x1 wide clock</string>
+    <string name="compact_4x1_clock_title">hw: simple wide clock</string>
+    <string name="compact_2x1_clock_title">5)simple 2x1 clock</string>
+    <string name="misty_blur_clock_title">hw: riband clock</string>
+    <string name="wall_clock_title">hw: \"wall\" clock</string>
+    <string name="analog_clock_title">hw: analog clock</string>
+
+    <string name="clock_options">Clock settings</string>
+
+    <string name="time_format">12/24 time format</string>
+    <string name="use_24time_format">Use 24-hour format</string>
+    <string name="use_12time_format">Use 12-hour format</string>
+
+    <string name="behavior">Behavior</string>
+    <string name="clock_tap_title">Tap on clock</string>
+    <string name="date_tap_title">Tap on date</string>
+    <string name="clock_tap_summary">Select an application that runs after tapping on clock</string>
+    <string name="date_tap_summary">Select an application that runs after tapping on date</string>
+
+    <string name="color_selection">Widget colors settings</string>
+
+    <string name="weekday_color">Color: day of the week</string>
+    <string name="weekdat_color_summary">Select color to display the day of the week</string>
+
+    <string name="weekday_inactive_color">Color: "inactive" day of the week</string>
+    <string name="weekday_inactive_color_summary">Select color to display the inactive day of the week</string>
+
+    <string name="clock_color">Color: clock</string>
+    <string name="clock_color_summary">Select color to display clock</string>
+
+    <string name="date_color">Color: date</string>
+    <string name="date_color_summary">Select color to display current date</string>
+
+    <string name="apply_widget_config">Apply changes</string>
+
+    <string name="widget_just_title">Widget alignment</string>
+    <!--string name="widget_just_summary">Выравнивание элементов виджета</string -->
+
+    <string name="widget_theme_title">Theme</string>
+    <string name="widget_theme_summary">Widget\'s theme</string>
+    <string name="widget_random_theme">Use selected theme</string>
+    <string name="widget_random_theme_summary_on">Will be used the selected theme</string>
+    <string name="widget_random_theme_summary_off">Will be used the random theme</string>
+
+    <string name="widget_theme_inverted_color_title">Dark colors</string>
+    <string name="widget_theme_use_light_summary">Light theme</string>
+    <string name="widget_theme_use_dark_summary">Dark theme</string>
+
+    <string name="theme_dialog_title">Theme selection</string>
+
+    <string name="widget_hint">Tap on the widget to adjust its appearance and behavior</string>
+    <string name="widget_hint2">To apply the widget settings press Menu -> Apply changes</string>
+
+    <string name="use_alt_action">Missed events processing</string>
+    <string name="alt_action_summary_on">Tap to process missed event (eg show the Call Log)</string>
+    <string name="alt_action_summary_off">Tap to start selected application</string>
+
+    <!-- ^^ ver 1.2 ^^ -->
+    <string name="texts_color_group">Colors</string>
+    <string name="show_alarms">Show active alarms</string>
+    <!-- ^^ ver 1.4 ^^ -->
+</resources>

@@ -1,0 +1,160 @@
+package info.hamster.widgets;
+
+import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.ContentObserver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.IBinder;
+import android.provider.CallLog;
+import android.util.Log;
+import info.hamster.widgets.compact_clock.CompactClockWidget;
+import info.hamster.widgets.minimal_clock.MinimalClockWidget;
+import info.hamster.widgets.misty_blur.MistyClockWidget;
+
+import info.hamster.widgets.test.TestWidget;
+import info.hamster.widgets.wall_clock.WallClockWidget;
+import info.hamster.widgets.wide_clock_4x1.WideClock4x1Widget;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 11.02.11
+ */
+public class WidgetService extends Service {
+
+    final private String TAG = "hamster's widgets pack:";
+
+    private TimeEventsReceiver timeEventsReceiver = null;
+    private CallsEventsObserver callsEventsObserver = null;
+    private SmsEventsObserver smsEventsObserver = null;
+
+    public static boolean ServiceStarted = false;
+    public static int missedCallsCount = -1;
+    public static int unreadSmsCount = -1;
+
+    private class SmsEventsObserver extends ContentObserver {
+        public SmsEventsObserver() {
+            super(null);
+        }
+
+        protected void getUnreadedSms() {
+            Uri smsUri = Uri.parse("content://sms/");
+            Cursor c = getContentResolver().query(
+                    smsUri, null,
+                    "read = ?", new String[]{"0"},
+                    "date DESC");
+            unreadSmsCount = c.getCount();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            if (Config.LOGGING)
+                Log.d(TAG, "sms observer fired!");
+            final int t = unreadSmsCount;
+            getUnreadedSms();
+            if (t != unreadSmsCount)
+                getApplicationContext().sendBroadcast(new Intent("info.hamster.widgets.time_to_update"));
+        }
+    }
+
+    private class CallsEventsObserver extends ContentObserver {
+
+        public CallsEventsObserver() {
+            super(null);
+        }
+
+        protected void getMissedCalls() {
+            Cursor c = getContentResolver().query(
+                    CallLog.Calls.CONTENT_URI,
+                    null,
+                    CallLog.Calls.TYPE + " = ? AND " + CallLog.Calls.NEW + " = ?",
+                    new String[]{Integer.toString(CallLog.Calls.MISSED_TYPE), "1"},
+                    CallLog.Calls.DATE + " DESC"
+            );
+
+            missedCallsCount = c.getCount();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            final int t = missedCallsCount;
+            getMissedCalls();
+            if (t != missedCallsCount) {
+                getApplicationContext().sendBroadcast(new Intent("info.hamster.widgets.time_to_update"));
+            }
+        }
+    }
+
+    private class TimeEventsReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (missedCallsCount < 0)
+                callsEventsObserver.getMissedCalls();
+
+            smsEventsObserver.getUnreadedSms(); // потому что не получаю сообщения об изменении "прочитанности" смс
+
+            MinimalClockWidget.UpdateWidget(context);
+            CompactClockWidget.UpdateWidget(context);
+            MistyClockWidget.UpdateWidget(context);
+            WallClockWidget.UpdateWidget(context);
+            WideClock4x1Widget.UpdateWidget(context);
+
+            if (Config.TESTING)
+                TestWidget.UpdateWidget(context);
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        if (callsEventsObserver == null)
+            callsEventsObserver = new CallsEventsObserver();
+        getApplicationContext().getContentResolver().registerContentObserver(CallLog.Calls.CONTENT_URI, true, callsEventsObserver);
+
+        if (smsEventsObserver == null)
+            smsEventsObserver = new SmsEventsObserver();
+        getApplicationContext().getContentResolver().registerContentObserver(Uri.parse("content://sms"), true, smsEventsObserver);
+
+        if (timeEventsReceiver == null)
+            timeEventsReceiver = new TimeEventsReceiver();
+        registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+        registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_TIME_CHANGED));
+        registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED));
+        registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_DATE_CHANGED));
+        registerReceiver(timeEventsReceiver, new IntentFilter("info.hamster.widgets.time_to_update"));
+
+        timeEventsReceiver.onReceive(this, intent);
+        ServiceStarted = true;
+
+        return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+
+        getApplicationContext().getContentResolver().unregisterContentObserver(callsEventsObserver);
+        callsEventsObserver = null;
+        getApplicationContext().getContentResolver().unregisterContentObserver(smsEventsObserver);
+        smsEventsObserver = null;
+
+        unregisterReceiver(timeEventsReceiver);
+        timeEventsReceiver = null;
+
+        if (Config.LOGGING)
+            Log.d(TAG, "Broadcaster unregistered, service stopping");
+
+        ServiceStarted = false;
+        super.onDestroy();
+    }
+}

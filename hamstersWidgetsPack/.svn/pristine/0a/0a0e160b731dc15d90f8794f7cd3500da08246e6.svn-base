@@ -1,0 +1,187 @@
+package info.hamster.widgets.wall_clock;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.*;
+import android.preference.PreferenceManager;
+import android.provider.CallLog;
+import android.util.Log;
+import android.view.View;
+import android.widget.RemoteViews;
+import info.hamster.widgets.BaseWidgetProvider;
+import info.hamster.widgets.Config;
+import info.hamster.widgets.R;
+import info.hamster.widgets.WidgetService;
+
+import java.util.Calendar;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 19.03.11
+ */
+public class WallClockWidget extends BaseWidgetProvider {
+
+    final static String TAG = "hamster's widgets pack";
+    final static private int[] theme_ids = {
+            R.drawable.wall6, R.drawable.wall5, R.drawable.wall4, R.drawable.wall0,
+            R.drawable.wall1, R.drawable.wall2, R.drawable.wall3
+    };
+    final static private int[][] digit_sizes = {
+            {64, 51, 66, 74, 67, 61, 66, 55, 67, 58, 30},
+            {55, 45, 63, 58, 64, 58, 59, 61, 65, 55, 25},
+            {50, 48, 93, 87, 70, 81, 76, 77, 80, 59, 30},
+            {75, 35, 75, 72, 72, 75, 72, 75, 75, 75, 17},
+            {86, 55, 78, 71, 75, 62, 80, 70, 97, 71, 30},
+            {57, 48, 74, 72, 64, 59, 56, 64, 56, 55, 38},
+            {53, 56, 55, 53, 48, 72, 48, 63, 58, 54, 29}
+    };
+    final static private int[] cell_sizes = {
+            74, 65, 93, 75, 97, 75, 72
+    };
+
+    static public void UpdateWidget(Context context) {
+
+        Calendar curDateTime = Calendar.getInstance();
+        final int hh = curDateTime.get(Calendar.HOUR_OF_DAY);
+        final int mm = curDateTime.get(Calendar.MINUTE);
+        if (Config.LOGGING)
+            Log.d(TAG, "now is " + hh + ", " + mm);
+
+        final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        final ComponentName thisWidget = new ComponentName(context, WallClockWidget.class);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+        Bitmap bmp = null;
+        final Resources r = context.getResources();
+        final RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.wall_clock);
+        int w = 0;
+        int theme;
+
+        for (int appWidgetId : appWidgetIds) {
+
+
+            int cur_x = 0;
+            final boolean isRandomTheme = !prefs.getBoolean(WallClockConfig.RandomThemePrefix + appWidgetId, false);
+
+            if (!isRandomTheme)
+                theme = prefs.getInt(WallClockConfig.ThemePrefix + appWidgetId, 0);
+            else
+                theme = (int) ((Math.random() * theme_ids.length));
+
+            if (Config.LOGGING)
+                Log.d(TAG, "random: " + isRandomTheme + ", theme = " + theme);
+
+            final Bitmap digits = BitmapFactory.decodeResource(r, theme_ids[theme]);
+            final int h = digits.getHeight();
+
+            final int bmp_w = digit_sizes[theme][hh / 10] + digit_sizes[theme][hh % 10] + digit_sizes[theme][10] +
+                    digit_sizes[theme][mm / 10] + digit_sizes[theme][mm % 10];
+            bmp = Bitmap.createBitmap(bmp_w, h, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bmp);
+            Paint p = new Paint();
+
+            final int color = prefs.getInt(WallClockConfig.ClockColorPrefix + appWidgetId, Color.WHITE);
+            p.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP));
+            p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+
+            int index = hh / 10;
+            w = index * cell_sizes[theme];
+            canvas.drawBitmap(digits, new Rect(w, 0, w + digit_sizes[theme][index], h),
+                    new Rect(cur_x, 0, cur_x + digit_sizes[theme][index], h), p);
+            cur_x += digit_sizes[theme][index];
+
+            index = hh % 10;
+            w = index * cell_sizes[theme];
+            canvas.drawBitmap(digits, new Rect(w, 0, w + digit_sizes[theme][index], h),
+                    new Rect(cur_x, 0, cur_x + digit_sizes[theme][index], h), p);
+            cur_x += digit_sizes[theme][index];
+
+            index = 10;
+            w = index * cell_sizes[theme];
+            canvas.drawBitmap(digits, new Rect(w, 0, w + digit_sizes[theme][index], h),
+                    new Rect(cur_x, 0, cur_x + digit_sizes[theme][index], h), p);
+            cur_x += digit_sizes[theme][index];
+
+            index = mm / 10;
+            w = index * cell_sizes[theme];
+            canvas.drawBitmap(digits, new Rect(w, 0, w + digit_sizes[theme][index], h),
+                    new Rect(cur_x, 0, cur_x + digit_sizes[theme][index], h), p);
+            cur_x += digit_sizes[theme][index];
+
+            index = mm % 10;
+            w = index * cell_sizes[theme];
+            canvas.drawBitmap(digits, new Rect(w, 0, w + digit_sizes[theme][index], h),
+                    new Rect(cur_x, 0, cur_x + digit_sizes[theme][index], h), p);
+            cur_x += digit_sizes[theme][index];
+
+            digits.recycle();
+
+            remoteViews.setImageViewBitmap(R.id.idTime, bmp);
+
+            if (WidgetService.missedCallsCount > 0) {
+                final Bitmap sign = BitmapFactory.decodeResource(r, R.drawable.wall_missed_call);
+                bmp = Bitmap.createBitmap(sign.getWidth(), sign.getHeight(), Bitmap.Config.ARGB_8888);
+                canvas = new Canvas(bmp);
+                canvas.drawBitmap(sign, 0, 0, p);
+                sign.recycle();
+                remoteViews.setImageViewBitmap(R.id.idMissedCall, bmp);
+                remoteViews.setViewVisibility(R.id.idMissedCall, View.VISIBLE);
+            } else
+                remoteViews.setViewVisibility(R.id.idMissedCall, View.GONE);
+
+            if (WidgetService.unreadSmsCount > 0) {
+                final Bitmap sign = BitmapFactory.decodeResource(r, R.drawable.wall_missed_sms);
+                bmp = Bitmap.createBitmap(sign.getWidth(), sign.getHeight(), Bitmap.Config.ARGB_8888);
+                canvas = new Canvas(bmp);
+                canvas.drawBitmap(sign, 0, 0, p);
+                sign.recycle();
+                remoteViews.setImageViewBitmap(R.id.idMissedSms, bmp);
+                remoteViews.setViewVisibility(R.id.idMissedSms, View.VISIBLE);
+            } else
+                remoteViews.setViewVisibility(R.id.idMissedSms, View.GONE);
+
+            final String action = prefs.getString(WallClockConfig.ClockActionPrefix + appWidgetId, "");
+            final boolean useAltAction = prefs.getBoolean(WallClockConfig.AltActionPrefix + appWidgetId, true);
+            if ((WidgetService.missedCallsCount > 0) && (useAltAction)) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, CallLog.Calls.CONTENT_URI);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                remoteViews.setOnClickPendingIntent(R.id.idClockSection, pendingIntent);
+            } else if ((WidgetService.unreadSmsCount > 0) && useAltAction) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                intent.setType("vnd.android-dir/mms-sms");
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                remoteViews.setOnClickPendingIntent(R.id.idClockSection, pendingIntent);
+            } else if (!action.equals("")) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                ComponentName name = new ComponentName(action, prefs.getString(WallClockConfig.ClockActivityPrefix + appWidgetId, ""));
+
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                intent.setComponent(name);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                remoteViews.setOnClickPendingIntent(R.id.idClockSection, pendingIntent);
+            } else {
+                Intent intent = new Intent(context, WallClockConfig.class);
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                remoteViews.setOnClickPendingIntent(R.id.idClockSection, pendingIntent);
+            }
+
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
+        }
+
+    }
+}

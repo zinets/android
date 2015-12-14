@@ -1,0 +1,218 @@
+package info.hamster.widgets.test;
+
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.*;
+import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.widget.RemoteViews;
+import info.hamster.widgets.BaseWidgetProvider;
+import info.hamster.widgets.R;
+import info.hamster.widgets.wide_clock_4x2.WideClock4x2WidgetConfig;
+
+import java.util.Calendar;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 19.03.11
+ * Time: 11:55
+ * To change this template use File | Settings | File Templates.
+ */
+public class TestWidget extends BaseWidgetProvider {
+
+    public void UpdateWidget(Context context) {
+//        Bitmap myBitmap = Bitmap.createBitmap(160, 84, Bitmap.Config.ARGB_4444);
+//        Canvas myCanvas = new Canvas(myBitmap);
+//        Paint paint = new Paint();
+//        Typeface clock = Typeface.createFromAsset(context.getAssets(), "atomic.ttf");
+//        paint.setAntiAlias(true);
+//        paint.setSubpixelText(true);
+//        paint.setTypeface(clock);
+//        paint.setStyle(Paint.Style.FILL);
+//        paint.setColor(Color.WHITE);
+//        paint.setTextSize(65);
+//        paint.setTextAlign(Paint.Align.CENTER);
+//        myCanvas.drawText("test", 0, 0, paint);
+
+
+//        int[] mColors = new int[]{
+//                0xffffffff, 0xffff0000, 0xffff9900, 0xfffff000, 0xff00ff00,
+//                0xff00ffcc, 0xff0000ff, 0xffff00ff, 0xff000000, 0xff000000,
+//                0xffffffff};
+//
+//        Shader s = new SweepGradient(0, 0, mColors, null);
+//
+//        Bitmap srcBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
+//        Canvas srcCanvas = new Canvas(srcBitmap);
+//        Paint srcPaint = new Paint();
+//        Typeface clock = Typeface.createFromAsset(context.getAssets(), "aBighausTitulBrkHll.ttf");
+//        srcPaint.setAntiAlias(true);
+//        srcPaint.setSubpixelText(true);
+//        srcPaint.setTypeface(clock);
+//        srcPaint.setStyle(Paint.Style.FILL);
+//        srcPaint.setShader(s);
+//        srcPaint.setTextSize(35);
+//        srcPaint.setTextAlign(Paint.Align.CENTER);
+//        srcCanvas.drawText("test", 50, 100, srcPaint);
+
+        Calendar curDateTime = Calendar.getInstance();
+        int test = 3;
+        Bitmap bmp = null;
+
+        switch (test) {
+            case 1: {
+                bmp = Bitmap.createBitmap(150, 150, Bitmap.Config.ARGB_4444);
+                int w = bmp.getWidth();
+                int h = bmp.getHeight();
+                Canvas canvas = new Canvas(bmp);
+                Paint p = new Paint();
+                p.setColor(Color.RED);
+                canvas.drawRect(0, 0, w, h, p);
+
+                p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+                Bitmap clock = BitmapFactory.decodeResource(context.getResources(), R.drawable.a_clock1);
+                canvas.drawBitmap(clock, 0, 0, p);
+
+                clock.recycle();
+                clock = BitmapFactory.decodeResource(context.getResources(), R.drawable.a_clock1_h);
+                canvas.translate(w / 2, h / 2);
+                canvas.save();
+
+                int hour = curDateTime.get(Calendar.HOUR) % 12;
+                int min = curDateTime.get(Calendar.MINUTE);
+
+                canvas.rotate(hour * 30 + min / 2 + 180);
+                p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+                canvas.drawBitmap(clock, -3, -4, p);
+                clock.recycle();
+
+                clock = BitmapFactory.decodeResource(context.getResources(), R.drawable.a_clock1_m);
+                canvas.restore();
+                canvas.rotate(180 + min * 6);
+                canvas.drawBitmap(clock, -3, -4, p);
+                clock.recycle();
+
+                break;
+            }
+            case 2: {
+
+                bmp = Bitmap.createBitmap(150, 150, Bitmap.Config.ARGB_4444);
+                int w = bmp.getWidth();
+                int h = bmp.getHeight();
+                Canvas canvas = new Canvas(bmp);
+                Paint p = new Paint();
+                p.setColor(Color.RED);
+                canvas.drawRect(0, 0, w, h, p);
+
+                p.setAntiAlias(true);
+
+                p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+                Bitmap clock = BitmapFactory.decodeResource(context.getResources(), R.drawable.a_clock2);
+                canvas.drawBitmap(clock, 0, 0, p);
+
+                clock.recycle();
+                clock = BitmapFactory.decodeResource(context.getResources(), R.drawable.a_clock2_h);
+                canvas.translate(w / 2, h / 2);
+                canvas.save();
+
+                int hour = 23; //curDateTime.get(Calendar.HOUR);
+                int min = 00; //curDateTime.get(Calendar.MINUTE);
+
+                Paint text = new Paint();
+
+
+                canvas.rotate(hour * 15 + min / 2 + 180);
+                p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+                canvas.drawBitmap(clock, -12, -12, p);
+                clock.recycle();
+                canvas.rotate(90);
+                text.setTextSize(9);
+                text.setAntiAlias(true);
+                text.setSubpixelText(true);
+                canvas.drawText("you", 27, 2, text);
+
+                break;
+            }
+            case 3: {
+                Resources r = context.getResources();
+                final Drawable dial = r.getDrawable(R.drawable.a_clock3);
+                final Drawable hand = r.getDrawable(R.drawable.a_clock3_h);
+
+                Paint p = new Paint();
+                p.setAntiAlias(true);
+                p.setSubpixelText(true);
+                p.setTextSize(10);
+                p.setColor(Color.BLACK);
+                p.setTypeface(Typeface.DEFAULT_BOLD);
+
+                int w = dial.getIntrinsicWidth();
+                int h = dial.getIntrinsicHeight();
+                dial.setBounds(0, 0, w, h);
+                hand.setBounds(0, 0, hand.getIntrinsicWidth(), hand.getIntrinsicHeight());
+
+                bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bmp);
+
+                dial.draw(canvas);
+                canvas.translate(w / 2, h / 2);
+
+                final int cText = 2;
+                final String[] texts = {"me", "you", "Paris", "GMT +2"};
+                final int[] hours = {12, 15, 9, curDateTime.get(Calendar.HOUR)};
+                final int[] mins = {0, 30, 1, curDateTime.get(Calendar.MINUTE)};
+                final int[] colors = {Color.BLACK, Color.BLUE, Color.RED, Color.GREEN};
+
+                for (int i = 0; i < cText; i++) {
+                    canvas.save();
+
+                    canvas.rotate(hours[i] / 24.0f * 360 + mins[i] / 4 - 90);
+                    canvas.translate(-8, -10);
+                    hand.draw(canvas);
+
+                    canvas.translate(8, 10);
+                    String text = texts[i];
+                    p.setColor(colors[i]);
+                    float[] widths = new float[text.length()];
+                    p.getTextWidths(text, widths);
+                    int www = 0;
+                    for (int x = 0; x < text.length(); x++) {
+                        www += widths[x];
+                    }
+
+                    float dx = hand.getIntrinsicWidth() - 8 - 10 - www;
+                    if (hours[i] > 12)
+                        canvas.rotate(180, dx + 8, 0);
+                    canvas.drawText(text, dx, 3, p);
+
+                    canvas.restore();
+                }
+
+                break;
+            }
+            case 5: {
+
+                break;
+            }
+        }
+
+        final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        final ComponentName thisWidget = new ComponentName(context, TestWidget.class);
+
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+        for (int appWidgetId : appWidgetIds) {
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.test);
+
+            views.setImageViewBitmap(R.id.idTestImage, bmp);
+
+            appWidgetManager.updateAppWidget(appWidgetId, views);
+        }
+    }
+}

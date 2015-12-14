@@ -1,0 +1,14 @@
+package info.hamster.widgets.compact_clock;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 18.02.11
+ */
+public class CompactClock2x1WidgetConfig extends CompactClockWidgetConfig {
+    // preferences prefixes
+    static final String TimeFormatPrefix = "timeFormat_compactClock2x1";
+    static final String ClockActionPrefix = "clockActivity_compactClock2x1";
+    static final String ClockActivityPrefix = "clockAction_compactClock2x1";
+    static final String WidgetDefaultThemeWhite = "lightTheme_compactClock2x1";
+}

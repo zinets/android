@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+            android:title="@string/widget_theme_title"
+            android:summaryOff="@string/widget_theme_use_dark_summary"
+            android:summaryOn="@string/widget_theme_use_light_summary"
+            android:key="widgetLightTheme"
+            android:defaultValue="true"/>
+
+    <PreferenceCategory
+            android:title="@string/behavior">
+        <ListPreference
+                android:title="@string/clock_tap_title"
+                android:summary="@string/clock_tap_summary"
+                android:key="clockAction"
+                android:defaultValue="0"/>
+    </PreferenceCategory>
+</PreferenceScreen>

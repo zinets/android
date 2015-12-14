@@ -1,0 +1,37 @@
+package info.hamster.widgets;
+
+import android.net.Uri;
+import android.provider.CallLog;
+import android.util.Log;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 09.04.11
+ */
+
+public class Config {
+
+    final static String TAG = "hamster's widgets pack";
+
+    public final static boolean LOGGING = true;
+    public final static boolean TESTING = false;
+
+    // missed section
+    final static public Uri MissedCallsUri = CallLog.Calls.CONTENT_URI;
+    final static public String MissedCallsCountExtra = "info.hamster.widgets.providers.missedCalls";
+
+    final static public Uri MissedSmsUri = Uri.parse("content://sms/");
+    final static public Uri MissedMmsSmsUri = Uri.parse("content://mms-sms/");
+    final static public String MissedSmsCountExtra = "info.hamster.widgets.providers.missedSms";
+
+    final static public String BatteryStatus = "info.hamster.widgets.providers.batteryStatus";
+    final static public String BatteryLevel = "info.hamster.widgets.providers.batteryLevel";
+
+
+    public static void Log(String LogMessage) {
+        if (LOGGING)
+            Log.d(TAG, LogMessage);
+    }
+
+}

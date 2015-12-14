@@ -1,0 +1,179 @@
+package info.hamster.widgets.misty_blur;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.*;
+import android.os.BatteryManager;
+import android.preference.PreferenceManager;
+import android.text.format.DateUtils;
+import android.view.View;
+import android.widget.RemoteViews;
+import info.hamster.widgets.BaseWidgetProvider;
+import info.hamster.widgets.Config;
+import info.hamster.widgets.R;
+
+import java.util.Calendar;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 19.02.11
+ */
+public class MistyClockWidget extends BaseWidgetProvider {
+
+    public void UpdateWidget(Context context) {
+
+        final int[] baseColor = {Color.rgb(0xff, 0xff, 0xff),
+                Color.rgb(0x00, 0x00, 0x00), Color.rgb(0xff, 0xff, 0xff),
+                Color.rgb(0x94, 0x48, 0x01), Color.rgb(0xff, 0x00, 0x00),
+                Color.rgb(0xa2, 0xd8, 0x9e), Color.rgb(0xda, 0xc6, 0x93),
+                Color.rgb(0xc6, 0xf9, 0xfc)};
+
+        Calendar curDateTime = Calendar.getInstance();
+
+        final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        final ComponentName thisWidget = new ComponentName(context, MistyClockWidget.class);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+        final Resources res = context.getResources();
+        final String pkgName = context.getPackageName();
+        final String[] themes = res.getStringArray(R.array.misty_themes);
+
+        for (int appWidgetId : appWidgetIds) {
+            Config.Log("widget ID: " + appWidgetId);
+            boolean am = (!prefs.getBoolean(MistyClockWidgetConfig.TimeFormatPrefix + appWidgetId, true));
+            final int theme = prefs.getInt(MistyClockWidgetConfig.ThemePrefix + appWidgetId, 0);
+            int resId = res.getIdentifier("@layout/" + themes[theme], null, pkgName);
+            RemoteViews remoteViews = new RemoteViews(pkgName, resId);
+
+            final int z = curDateTime.get(Calendar.DAY_OF_WEEK);
+
+            final int color2 = prefs.getInt(MistyClockWidgetConfig.WeekDaysColorPrefix + appWidgetId, baseColor[theme]);
+
+            remoteViews.setTextViewText(R.id.idDayOfWeek, DateUtils.getDayOfWeekString(z, DateUtils.LENGTH_MEDIUM).toUpperCase());
+            remoteViews.setTextColor(R.id.idDayOfWeek, color2);
+
+            String temp = "";
+            for (int x = Calendar.SUNDAY; x < z; x++)
+                temp = temp + DateUtils.getDayOfWeekString(x, DateUtils.LENGTH_MEDIUM).toUpperCase();
+            remoteViews.setTextViewText(R.id.idDaysBefore, temp);
+            int color = prefs.getInt(MistyClockWidgetConfig.WeekDaysInactiveColorPrefix + appWidgetId, Color.TRANSPARENT);
+            if (color != Color.TRANSPARENT) {
+                remoteViews.setTextColor(R.id.idDaysBefore, color);
+                remoteViews.setTextColor(R.id.idDaysAfter, color);
+            }
+
+            temp = "";
+            for (int x = z + 1; x <= Calendar.SATURDAY; x++)
+                temp = temp + DateUtils.getDayOfWeekString(x, DateUtils.LENGTH_MEDIUM).toUpperCase();
+            remoteViews.setTextViewText(R.id.idDaysAfter, temp);
+
+            color = prefs.getInt(MistyClockWidgetConfig.ClockColorPrefix + appWidgetId, Color.TRANSPARENT);
+            if (color != Color.TRANSPARENT) {
+                remoteViews.setTextColor(R.id.idTime, color);
+                remoteViews.setTextColor(R.id.idTimeFormat, color);
+            }
+            if (am) {
+                remoteViews.setTextViewText(R.id.idTime, String.format("%1$tl:%1$tM", curDateTime));
+                remoteViews.setTextViewText(R.id.idTimeFormat, String.format("%1$tp", curDateTime));
+            } else {
+                remoteViews.setTextViewText(R.id.idTime, String.format("%1$tk:%1$tM", curDateTime));
+                remoteViews.setTextViewText(R.id.idTimeFormat, "");
+            }
+
+            color = prefs.getInt(MistyClockWidgetConfig.DateColorPrefix + appWidgetId, Color.TRANSPARENT);
+
+            remoteViews.setTextViewText(R.id.idDate, String.format("%1$te %1$tB", curDateTime));
+            if (color != Color.TRANSPARENT)
+                remoteViews.setTextColor(R.id.idDate, color);
+
+            // missed events section
+            Bitmap ico = null;
+            String mc = null;
+            if (missedCallsCount > 0) {
+                ico = BitmapFactory.decodeResource(context.getResources(), R.drawable.phone_icon);
+                if (missedCallsCount == 1)
+                    mc = missedCallTime;
+                else
+                    mc = Integer.toString(missedCallsCount);
+            } else if (missedSmsCount > 0) {
+                ico = BitmapFactory.decodeResource(context.getResources(), R.drawable.chat_icon);
+                mc = Integer.toString(missedSmsCount);
+            } else if (unreadedMailCount > 0) {
+                ico = BitmapFactory.decodeResource(context.getResources(), R.drawable.mail_icon);
+                mc = Integer.toString(unreadedMailCount);
+            } else if (calEventsCount > 0) {
+                ico = BitmapFactory.decodeResource(context.getResources(), R.drawable.calendar_icon);
+                mc = Integer.toString(calEventsCount);
+            } else if ((alarmsCount > 0) && (prefs.getBoolean(MistyClockWidgetConfig.ShowAlarmsPrefix + appWidgetId, false))) {
+                ico = BitmapFactory.decodeResource(context.getResources(), R.drawable.alarm_icon);
+
+                if (alarmsCount == 1)
+                    mc = alarmNearest;
+                else
+                    mc = Integer.toString(alarmsCount);
+            } else {
+                // отображаем батарею
+                switch (batteryStatus) {
+                    case BatteryManager.BATTERY_STATUS_CHARGING:
+                        ico = BitmapFactory.decodeResource(context.getResources(), R.drawable.battery_icon);
+                        mc = Integer.toString(batteryLevel) + "%";
+                        break;
+                    default:
+                        mc = "";
+
+                        break;
+                }
+            }
+
+            if (ico != null) {
+                final int w = ico.getWidth();
+                final int h = ico.getHeight();
+
+                Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bmp);
+                Paint p = new Paint();
+                p.setColorFilter(new PorterDuffColorFilter(color2, PorterDuff.Mode.SRC_ATOP));
+                p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+                canvas.drawBitmap(ico, 0, 0, p);
+                ico.recycle();
+
+                remoteViews.setImageViewBitmap(R.id.idMissedIcon, bmp);
+                if (mc != null)
+                    remoteViews.setTextViewText(R.id.idMissedCount, mc);
+                remoteViews.setTextColor(R.id.idMissedCount, color2);
+
+                remoteViews.setViewVisibility(R.id.idMissedSection, View.VISIBLE);
+            } else
+                remoteViews.setViewVisibility(R.id.idMissedSection, View.GONE);
+
+            String action = prefs.getString(MistyClockWidgetConfig.ClockActionPrefix + appWidgetId, "");
+
+            if (!action.equals("")) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                ComponentName name = new ComponentName(action, prefs.getString(MistyClockWidgetConfig.ClockActivityPrefix + appWidgetId, ""));
+
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                intent.setComponent(name);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                remoteViews.setOnClickPendingIntent(R.id.idClockSection, pendingIntent);
+            } else {
+                Intent intent = new Intent(context, MistyClockWidgetConfig.class);
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                remoteViews.setOnClickPendingIntent(R.id.idClockSection, pendingIntent);
+            }
+
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
+        }
+    }
+}

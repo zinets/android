@@ -1,0 +1,125 @@
+package info.hamster.widgets.wall_clock;
+
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.MenuItem;
+import info.hamster.widgets.*;
+
+/**
+ * User: Zinetz Victor
+ * Date: 20.03.11
+ */
+public class WallClockConfig extends BaseClockConfig {
+
+    private int clockActionIndex = -1;
+    static final String ClockActionPrefix = "clockActivity_wall";
+    static final String ClockActivityPrefix = "clockAction_wall";
+    static final String ClockActionIndex = "clockActionIndex_wall";
+
+    static final String AltActionPrefix = "useAltAction_wall";
+
+    static final String RandomThemePrefix = "randomTheme_wall";
+
+    private int themeIndex = -1;
+    static final String ThemePrefix = "themeIndex_wall";
+
+    private int clockColor = Color.TRANSPARENT;
+    static final String ClockColorPrefix = "clockColor_wall";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+        addPreferencesFromResource(R.xml.wall_config);
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        // 1) widgetColor
+        Preference colorPref = findPreference("widgetColor");
+        colorPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                int color = prefs.getInt(ClockColorPrefix + mNewWidgetId, Color.WHITE);
+                new ColorPickerDialog(WallClockConfig.this, new ColorPickerDialog.OnColorChangedListener() {
+                    public void colorChanged(int color) {
+                        clockColor = color;
+                    }
+                }, color).show();
+                return true;
+            }
+        });
+
+        // 2) randomTheme
+        final CheckBoxPreference randomTheme = (CheckBoxPreference) findPreference("widgetRandomTheme");
+        randomTheme.setChecked(prefs.getBoolean(RandomThemePrefix + mNewWidgetId, true));
+
+        // 3) theme
+        final ThemeSelector themePreference = (ThemeSelector) findPreference("widgetTheme");
+        themePreference.setOnPreferenceChangeListener(
+                new ThemeSelector.OnPreferenceChangeListener() {
+                    public boolean onPreferenceChange(Preference preference, Object o) {
+                        themeIndex = (Integer) o;
+                        return true;
+                    }
+                }
+        );
+
+        final CheckBoxPreference check = (CheckBoxPreference) findPreference("useAltAction");
+        check.setChecked(prefs.getBoolean(AltActionPrefix + mNewWidgetId, true));
+
+        final ListPreference listClockActions = (ListPreference) findPreference("clockAction");
+        listClockActions.setOnPreferenceChangeListener(
+                new Preference.OnPreferenceChangeListener() {
+                    public boolean onPreferenceChange(Preference preference, Object o) {
+                        clockActionIndex = ((ListPreference) preference).findIndexOfValue(o.toString());
+                        return true;
+                    }
+                }
+        );
+
+        listClockActions.setOnPreferenceClickListener(
+                new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        ((ListPreference) preference).setValueIndex(prefs.getInt(ClockActionIndex + mNewWidgetId, 0));
+                        return true;
+                    }
+                }
+        );
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = prefs.edit();
+
+        if (clockColor != Color.TRANSPARENT)
+            editor.putInt(ClockColorPrefix + mNewWidgetId, clockColor);
+        if (Config.LOGGING)
+            Log.d(TAG, "clockColor = " + clockColor);
+
+        final CheckBoxPreference randomTheme = (CheckBoxPreference) findPreference("widgetRandomTheme");
+        editor.putBoolean(RandomThemePrefix + mNewWidgetId, randomTheme.isChecked());
+
+        if (themeIndex >= 0)
+            editor.putInt(ThemePrefix + mNewWidgetId, themeIndex);
+
+        if (clockActionIndex >= 0) {
+            editor.putString(ClockActivityPrefix + mNewWidgetId, appActivityNames[clockActionIndex]);
+            editor.putString(ClockActionPrefix + mNewWidgetId, appPackageNames[clockActionIndex]);
+            editor.putInt(ClockActionIndex + mNewWidgetId, clockActionIndex);
+        }
+
+        final CheckBoxPreference check = (CheckBoxPreference) findPreference("useAltAction");
+        editor.putBoolean(AltActionPrefix + mNewWidgetId, check.isChecked());
+
+        editor.commit();
+        return super.onOptionsItemSelected(item);
+    }
+
+}

@@ -1,0 +1,52 @@
+package info.hamster.widgets.compact_clock;
+
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.widget.RemoteViews;
+import info.hamster.widgets.BaseWidgetProvider;
+import info.hamster.widgets.R;
+
+import java.util.Calendar;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 18.02.11
+ */
+public class CompactClockWidget extends BaseWidgetProvider {
+
+    static public void UpdateWidget(Context context) {
+
+        Calendar curDateTime = Calendar.getInstance();
+        final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        final ComponentName thisWidget = new ComponentName(context, CompactClockWidget.class);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+        for (int appWidgetId : appWidgetIds) {
+            boolean am = (!prefs.getBoolean(CompactClockWidgetConfig.TimeFormatPrefix + appWidgetId, true));
+            boolean theme = prefs.getBoolean(CompactClockWidgetConfig.WidgetDefaultThemeWhite + appWidgetId, true);
+            RemoteViews remoteViews = null;
+            if (theme)
+                remoteViews = new RemoteViews(context.getPackageName(), R.layout.compact_clock);
+            else
+                remoteViews = new RemoteViews(context.getPackageName(), R.layout.compact_clock_dark);
+
+            if (am) {
+                remoteViews.setTextViewText(R.id.idTime, String.format("%1$tI:%1$tM", curDateTime));
+                remoteViews.setTextViewText(R.id.idTimeFormat, String.format("%1$tp", curDateTime));
+            } else {
+                remoteViews.setTextViewText(R.id.idTime, String.format("%1$tH:%1$tM", curDateTime));
+                remoteViews.setTextViewText(R.id.idTimeFormat, "");
+            }
+
+            remoteViews.setTextViewText(R.id.idDate, String.format("%1$ta, %1$te %1$tB", curDateTime));
+
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
+        }
+    }
+}

@@ -1,0 +1,54 @@
+package info.hamster.widgets;
+
+import android.net.Uri;
+import android.os.Build;
+import android.provider.CallLog;
+import android.util.Log;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 09.04.11
+ */
+
+public class Config {
+
+    final static String TAG = "hamster's widgets pack";
+
+    public final static boolean LOGGING = false;
+    public final static boolean TESTING = false;
+
+    // missed section
+    final static public Uri MissedCallsUri = CallLog.Calls.CONTENT_URI;
+    final static public String MissedCallsCountExtra = "info.hamster.widgets.providers.missedCalls";
+    final static public String MissedCallTimeExtra = "info.hamster.widgets.providers.missedCallTime";
+
+    final static public Uri MissedSmsUri = Uri.parse("content://sms/");
+    final static public Uri MissedMmsSmsUri = Uri.parse("content://mms-sms/");
+    final static public String MissedSmsCountExtra = "info.hamster.widgets.providers.missedSms";
+
+    final static public String BatteryStatus = "info.hamster.widgets.providers.batteryStatus";
+    final static public String BatteryLevel = "info.hamster.widgets.providers.batteryLevel";
+
+    final static public Uri AlarmUri = Uri.parse("content://com.android.alarmclock/alarm");
+    final static public String AlarmsCountExtra = "info.hamster.widgets.providers.newAlarms";
+    final static public String NearestAlarmExtra = "info.hamster.widgets.providers.nearestAlarm";
+
+    final static public String PendingCalendarEventsExtra = "info.hamster.widgets.providers.newEvents";
+
+    static public Uri CalendarObserverUri() {
+        Uri res = null;
+        if (Build.VERSION.SDK_INT == 7) // android 2.1
+            res = Uri.parse("content://calendar/calendar_alerts");
+        else if (Build.VERSION.SDK_INT > 7) //android 2.2
+            res = Uri.parse("content://com.android.calendar/calendar_alerts");
+        Config.Log("Calendar uri = " + res.toString());
+        return res;
+    }
+
+    public static void Log(String LogMessage) {
+        if (LOGGING)
+            Log.d(TAG, LogMessage);
+    }
+
+}

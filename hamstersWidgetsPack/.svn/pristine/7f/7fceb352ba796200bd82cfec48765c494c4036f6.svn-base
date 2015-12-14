@@ -1,0 +1,10 @@
+package info.hamster.widgets.compact_clock;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 18.02.11
+ */
+public class CompactClock2x1Widget extends CompactClockWidget {
+
+}

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">hamster\'s widgets pack</string>
+    <string name="service_name">hamster\'s monitoring service</string>
+    <string name="option_activity_title">hamster\'s widgets configurator</string>
+
+    <string name="wide_clock_4x2_title">1) wide clock 4x2</string>
+    <string name="minimal_clock_title">2) minimal clock</string>
+    <string name="wide_clock_4x1_title">3) wide clock 4x1</string>
+    <string name="compact_4x1_clock_title">4)simple 4x1 clock</string>
+    <string name="compact_2x1_clock_title">5)simple 2x1 clock</string>
+    <string name="misty_blur_clock_title">6) misty blur</string>
+
+    <string name="clock_options">Clock settings</string>
+
+    <string name="time_format">12/24 time format</string>
+    <string name="use_24time_format">Use 24-hour format</string>
+    <string name="use_12time_format">use 12-hour format</string>
+
+    <string name="behavior">Behavior</string>
+    <string name="clock_tap_title">Tap on clock</string>
+    <string name="date_tap_title">Tap on date</string>
+    <string name="clock_tap_summary">Действие при тапе по часам</string>
+    <string name="date_tap_summary">Действие при тапе по дате</string>
+
+    <string name="color_selection">Widget colors settings</string>
+    <string name="texts_color_group">Цвета элементов</string>
+
+    <string name="weekday_color">Цвет: день недели</string>
+    <string name="weekdat_color_summary">Цвет отображения дня недели</string>
+
+    <string name="weekday_inactive_color">Цвет: неактивный день недели</string>
+    <string name="weekday_inactive_color_summary">Цвет отображения неактивных дней недели</string>
+
+    <string name="clock_color">Цвет: часы</string>
+    <string name="clock_color_summary">Цвет отображения часов</string>
+
+    <string name="date_color">Цвет: дата</string>
+    <string name="date_color_summary">Цвет отображения текущей даты</string>
+
+    <string name="add_widget">Добавить виджет</string>
+    <string name="apply_widget_config">Применить изменения</string>
+
+    <string name="widget_just_title">Выравнивание виджета</string>
+    <string name="widget_just_summary">Выравнивание элементов виджета</string>
+
+    <string name="widget_theme_title">Theme</string>
+    <string name="widget_theme_summary">Widget\'s color theme</string>
+
+    <string name="widget_theme_inverted_color_title">Dark colors</string>
+    <string name="widget_theme_use_light_summary">Светлые символы</string>
+    <string name="widget_theme_use_dark_summary">Темные символы</string>
+
+    <string name="theme_dialog_title">Выбор цветовой темы</string>
+
+    <string name="widget_hint">Тапните по виджету, чтобы настроить его внешний вид и поведение</string>
+
+</resources>

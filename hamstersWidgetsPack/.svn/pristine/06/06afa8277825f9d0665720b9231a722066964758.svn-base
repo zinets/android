@@ -1,0 +1,108 @@
+package info.hamster.widgets.minimal_clock;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.widget.RemoteViews;
+import info.hamster.widgets.BaseWidgetProvider;
+import info.hamster.widgets.R;
+
+import java.util.Calendar;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 18.02.11
+ */
+public class MinimalClockWidget extends BaseWidgetProvider {
+
+    final static int res21_map[] = {
+            R.drawable.d00, R.drawable.d01, R.drawable.d02, R.drawable.d03, R.drawable.d04,
+            R.drawable.d05, R.drawable.d06, R.drawable.d07, R.drawable.d08, R.drawable.d09
+    };
+
+    final static int minimal_map[][] = {
+            {
+                    R.drawable.r00, R.drawable.r01, R.drawable.r02, R.drawable.r03, R.drawable.r04,
+                    R.drawable.r05, R.drawable.r06, R.drawable.r07, R.drawable.r08, R.drawable.r09
+            }, {
+                    R.drawable.b00, R.drawable.b01, R.drawable.b02, R.drawable.b03, R.drawable.b04,
+                    R.drawable.b05, R.drawable.b06, R.drawable.b07, R.drawable.b08, R.drawable.b09
+            }
+    };
+
+    final static int minimal_colors[] = {
+            0xfff86b2d,
+            0xff20269d
+    };
+
+    static public void UpdateWidget(Context context) {
+
+        Calendar curDateTime = Calendar.getInstance();
+        final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        final ComponentName thisWidget = new ComponentName(context, MinimalClockWidget.class);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+        for (int appWidgetId : appWidgetIds) {
+            boolean am = (!prefs.getBoolean(MinimalClockWidgetConfig.TimeFormatPrefix + appWidgetId, true));
+            int widgetPlace = prefs.getInt(MinimalClockWidgetConfig.WidgetPlacePrefix + appWidgetId, 0);
+            int theme = prefs.getInt(MinimalClockWidgetConfig.WidgetThemePrefix + appWidgetId, 0);
+
+            RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
+                    widgetPlace == 0 ? R.layout.minimal_clock_left : R.layout.minimal_clock);
+
+            int c = curDateTime.get(Calendar.HOUR_OF_DAY);
+            if (am && (c > 12))
+                c -= 12;
+
+            remoteViews.setImageViewResource(R.id.idHour1, res21_map[c / 10]);
+            remoteViews.setImageViewResource(R.id.idHour2, res21_map[c % 10]);
+            if (am)
+                remoteViews.setTextViewText(R.id.idTimeFormat, String.format("%1$tp", curDateTime));
+            else
+                remoteViews.setTextViewText(R.id.idTimeFormat, "");
+
+            c = curDateTime.get(Calendar.MINUTE);
+            remoteViews.setImageViewResource(R.id.idMin1, minimal_map[theme][c / 10]);
+            remoteViews.setImageViewResource(R.id.idMin2, minimal_map[theme][c % 10]);
+
+            remoteViews.setTextViewText(R.id.idDayOfWeek, String.format("%1$tA", curDateTime));
+            remoteViews.setTextColor(R.id.idDayOfWeek, minimal_colors[theme]);
+            remoteViews.setTextViewText(R.id.idDate, String.format("%1$te %1$tB", curDateTime));
+
+            String action = prefs.getString(MinimalClockWidgetConfig.ClockActionPrefix + appWidgetId, "");
+            if (!action.equals("")) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                ComponentName name = new ComponentName(action, prefs.getString(MinimalClockWidgetConfig.ClockActivityPrefix + appWidgetId, ""));
+
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                intent.setComponent(name);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                remoteViews.setOnClickPendingIntent(R.id.idClockSection, pendingIntent);
+            }
+
+            action = prefs.getString(MinimalClockWidgetConfig.DateActionPrefix + appWidgetId, "");
+            if (!action.equals("")) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                ComponentName name = new ComponentName(action, prefs.getString(MinimalClockWidgetConfig.DateActivityPrefix + appWidgetId, ""));
+
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                intent.setComponent(name);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                remoteViews.setOnClickPendingIntent(R.id.idDateSection, pendingIntent);
+            }
+
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
+        }
+    }
+}

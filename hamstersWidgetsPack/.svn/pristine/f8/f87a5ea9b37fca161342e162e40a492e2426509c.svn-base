@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+
+    <RelativeLayout
+            android:id="@+id/idClockSection"
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            >
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dip"
+                android:gravity="right"
+                >
+            <ImageView
+                    android:id="@+id/idHour1"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:src="@drawable/d01"/>
+            <ImageView
+                    android:id="@+id/idHour2"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:src="@drawable/d03"/>
+        </LinearLayout>
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="60dip"
+                android:gravity="right"
+                >
+            <ImageView
+                    android:id="@+id/idMin1"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:src="@drawable/r03"/>
+            <ImageView
+                    android:id="@+id/idMin2"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:src="@drawable/r04"/>
+        </LinearLayout>
+        <TextView
+                android:id="@id/idTimeFormat"
+                android:text="AM"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dip"
+                android:layout_marginLeft="5dip"
+                />
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+            android:id="@+id/idDateSection"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="bottom|center_horizontal"
+            android:orientation="vertical">
+        <TextView
+                android:id="@+id/idDayOfWeek"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:text="SUNDAY"
+                android:textColor="#f86b2d"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:gravity="right"
+                android:layout_marginRight="3dip"
+                android:layout_marginLeft="3dip"
+                />
+        <TextView
+                android:id="@id/idDate"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:text="31 DECEMBER"
+                android:textColor="#f7f2f2"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:gravity="right"
+                android:layout_marginRight="3dip"
+                android:layout_marginLeft="3dip"
+                />
+    </LinearLayout>
+</LinearLayout>

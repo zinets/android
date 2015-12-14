@@ -1,0 +1,96 @@
+package info.hamster.widgets.minimal_clock;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.widget.RemoteViews;
+import info.hamster.widgets.BaseWidgetProvider;
+import info.hamster.widgets.R;
+
+import java.util.Calendar;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 18.02.11
+ */
+public class MinimalClockWidget extends BaseWidgetProvider {
+
+    static public void UpdateWidget(Context context) {
+
+        Calendar curDateTime = Calendar.getInstance();
+
+        final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        final ComponentName thisWidget = new ComponentName(context, MinimalClockWidget.class);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+        for (int appWidgetId : appWidgetIds) {
+            boolean am = (!prefs.getBoolean(MinimalClockWidgetConfig.TimeFormatPrefix + appWidgetId, true));
+            int widgetPlace = prefs.getInt(MinimalClockWidgetConfig.WidgetPlacePrefix + appWidgetId, 0);
+
+            RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
+                    widgetPlace == 0 ? R.layout.minimal_clock_left : R.layout.minimal_clock);
+
+            // hours
+            if (am) {
+                remoteViews.setTextViewText(R.id.idHours, String.format("%1$tI", curDateTime));
+                remoteViews.setTextViewText(R.id.idTimeFormat, String.format("%1$tp", curDateTime));
+            } else {
+                remoteViews.setTextViewText(R.id.idHours, String.format("%1$tH", curDateTime));
+                remoteViews.setTextViewText(R.id.idTimeFormat, "");
+            }
+            // min
+            remoteViews.setTextViewText(R.id.idMins, String.format("%1$tM", curDateTime));
+            // day of week
+            remoteViews.setTextViewText(R.id.idDayOfWeek, String.format("%1$tA", curDateTime));
+            // date
+            remoteViews.setTextViewText(R.id.idDate, String.format("%1$te %1$tB", curDateTime));
+
+            Bitmap bmp = null;
+            final int color = prefs.getInt(MinimalClockWidgetConfig.WidgetColorPrefix + appWidgetId, Color.BLUE);
+
+            remoteViews.setTextColor(R.id.idMins, color + 0xd0000000);
+            remoteViews.setTextColor(R.id.idDayOfWeek, color);
+
+            bmp = Bitmap.createBitmap(3, 50, Bitmap.Config.ARGB_4444);
+            Canvas canvas = new Canvas(bmp);
+            canvas.drawColor(color + 0xd0000000);
+            remoteViews.setImageViewBitmap(R.id.idDivider, bmp);
+
+
+            String action = prefs.getString(MinimalClockWidgetConfig.ClockActionPrefix + appWidgetId, "");
+            if (!action.equals("")) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                ComponentName name = new ComponentName(action, prefs.getString(MinimalClockWidgetConfig.ClockActivityPrefix + appWidgetId, ""));
+
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                intent.setComponent(name);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                remoteViews.setOnClickPendingIntent(R.id.idClockSection, pendingIntent);
+            } else {
+                Intent intent = new Intent(context, MinimalClockWidgetConfig.class);
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                remoteViews.setOnClickPendingIntent(R.id.idClockSection, pendingIntent);
+            }
+
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
+            if (bmp != null)
+                bmp.recycle();
+        }
+    }
+}

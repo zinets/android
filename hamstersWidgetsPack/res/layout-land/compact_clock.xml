@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/idClockSection"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:background="#30000000"
+        >
+
+    <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            >
+        <TextView
+                android:id="@+id/idTime"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:gravity="center"
+                android:text="00:00"
+                android:textSize="52sp"
+                android:typeface="serif"
+                android:textColor="#ffffff"
+                android:includeFontPadding="false"
+                android:shadowColor="#000000"
+                android:shadowRadius="2.5"
+                android:shadowDx="0.0"
+                android:shadowDy="0.0"
+                />
+        <TextView
+                android:id="@+id/idTimeFormat"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:gravity="center_horizontal|top"
+                android:text="pm"
+                android:textSize="18sp"
+                android:typeface="serif"
+                android:textColor="#ffffff"
+                />
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:layout_weight="3"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+        <TextView
+                android:id="@+id/idDate"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:text="Sun, 32 Februar"
+                android:includeFontPadding="false"
+                android:typeface="sans"
+                android:textColor="#e0ffffff"
+                />
+    </LinearLayout>
+
+</LinearLayout>

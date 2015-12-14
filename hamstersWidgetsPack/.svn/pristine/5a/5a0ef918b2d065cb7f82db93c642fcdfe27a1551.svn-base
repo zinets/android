@@ -1,0 +1,72 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string-array name="placements">
+        <item>Слева</item>
+        <item>Справа</item>
+    </string-array>
+
+    <string-array name="placement_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <!-- темы для minimal clock -->
+    <string-array name="color_themes">
+        <item>Апельсин</item>
+        <item>Голубая</item>
+    </string-array>
+
+    <string-array name="color_themes_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <!-- темы для wide 1x4 -->
+    <string-array name="wide_1x4_color_themes">
+        <item>Прозрачная</item>
+        <item>Голубое небо</item>
+        <item>Розовая</item>
+        <item>Зелень</item>
+        <item>Серость</item>
+    </string-array>
+
+    <string-array name="wide_1x4_color_themes_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <!-- темы для misty -->
+    <string-array name="misty_themes">
+        <item>misty_dark</item>
+        <item>misty_whitesand</item>
+        <item>misty_pink</item>
+        <item>misty_roybush</item>
+        <item>misty_blood</item>
+        <item>misty_bamboo</item>
+        <item>misty_brown</item>
+        <item>misty_water</item>
+    </string-array>
+
+    <!-- темы для wall -->
+    <string-array name="wall_themes">
+        <item>wall_theme0</item>
+        <item>wall_theme1</item>
+        <item>wall_theme2</item>
+        <item>wall_theme3</item>
+        <item>wall_theme4</item>
+        <item>wall_theme5</item>
+        <item>wall_theme6</item>
+    </string-array>
+
+    <string-array name="analog_themes">
+        <item>analog_theme0</item>
+        <item>analog_theme1</item>
+        <item>analog_theme2</item>
+        <item>analog_theme3</item>
+    </string-array>
+
+    <!-- ^^ ver 1.2 ^^ -->
+
+</resources>

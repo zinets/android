@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">hamster\'s widgets pack</string>
+    <string name="service_name">Monitoring service</string>
+    <string name="wide_clock_title">1) Wide Clock</string>
+    <string name="minimal_clock_title">2) Minimal Clock</string>
+    <string name="wide_1x4_clock_title">3) Wide Minimal Clock</string>
+    <string name="compact_1x4_clock_title">4)Wide Compact Clock</string>
+
+    <string name="clock_options">Настройки часов</string>
+    <string name="time_format">12/24 формат времени</string>
+    <string name="use_24time_format">Использовать 24-часовой формат</string>
+    <string name="use_12time_format">Использовать 12-часовой формат</string>
+
+    <string name="behavior">Поведение</string>
+    <string name="clock_tap_title">Тап по часам</string>
+    <string name="date_tap_title">Тап по дате</string>
+    <string name="clock_tap_summary">Действие при тапе по часам</string>
+    <string name="date_tap_summary">Действие при тапе по дате</string>
+
+    <string name="add_widget">Добавить виджет</string>
+    <string name="option_activity_title">hamster\'s widgets Configurator</string>
+
+    <string name="widget_just_title">Выравнивание виджета</string>
+    <string name="widget_just_summary">Выравнивание элементов виджета</string>
+    <string name="widget_theme_title">Тема</string>
+    <string name="widget_theme_summary">Цветовая тема виджета</string>
+    <string name="widget_theme_inverted_color_title">Инверсия цвета</string>
+    <string name="widget_theme_use_light_summary">Светлые символы</string>
+    <string name="widget_theme_use_dark_summary">Темные символы</string>
+</resources>

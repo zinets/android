@@ -1,0 +1,75 @@
+package info.hamster.widgets.compact_clock;
+
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
+import android.view.MenuItem;
+import info.hamster.widgets.BaseClockConfig;
+import info.hamster.widgets.R;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 18.02.11
+ */
+public class CompactClockWidgetConfig extends BaseClockConfig {
+
+    // preferences prefixes
+    static final String TimeFormatPrefix = "timeFormat_compactClock";
+    static final String ClockActionPrefix = "clockActivity_compactClock";
+    static final String ClockActivityPrefix = "clockAction_compactClock";
+    static final String WidgetDefaultThemeWhite = "lightTheme_compactClock";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+
+        addPreferencesFromResource(R.xml.compact_clock_config);
+
+        final ListPreference listClockActions = (ListPreference) findPreference("clockAction");
+        listClockActions.setEntries(appLabels);
+        listClockActions.setEntryValues(appPackageNames);
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        listClockActions.setOnPreferenceChangeListener(
+                new Preference.OnPreferenceChangeListener() {
+                    public boolean onPreferenceChange(Preference preference, Object o) {
+                        int i = ((ListPreference) preference).findIndexOfValue(o.toString());
+                        // для записи в preferences создаем редактор и коммитим изменения потом
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString(ClockActivityPrefix + mNewWidgetId, appActivityNames[i]);
+                        editor.putString(ClockActionPrefix + mNewWidgetId, appPackageNames[i]);
+                        editor.commit();
+
+                        return true;
+                    }
+                }
+        );
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        // надо сохранить:
+        // 1. формат даты
+        CheckBoxPreference pref = (CheckBoxPreference) findPreference("timeFormat");
+        editor.putBoolean(TimeFormatPrefix + mNewWidgetId, pref.isChecked());
+        pref = (CheckBoxPreference) findPreference("widgetLightTheme");
+        editor.putBoolean(WidgetDefaultThemeWhite + mNewWidgetId, pref.isChecked());
+
+        // 2. выбор для тапа по часам
+        //      сохраняется выше
+        // 3. выбор для тапа по дате
+        //      сохраняется выше
+
+        editor.commit();
+        return super.onOptionsItemSelected(item);
+    }
+}

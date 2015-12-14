@@ -1,0 +1,52 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string-array name="placements">
+        <item>Left</item>
+        <item>Right</item>
+    </string-array>
+
+    <string-array name="placement_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <!-- темы для minimal clock -->
+    <string-array name="color_themes">
+        <item>Orange</item>
+        <item>Blue</item>
+    </string-array>
+
+    <string-array name="color_themes_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <!-- темы для wide 1x4 -->
+    <string-array name="wide_1x4_color_themes">
+        <item>Transparent</item>
+        <item>Light blue</item>
+        <item>Pink</item>
+        <item>Green</item>
+        <item>Gray</item>
+    </string-array>
+
+    <string-array name="wide_1x4_color_themes_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <!-- темы для misty -->
+    <string-array name="misty_themes">
+        <item>misty_dark</item>
+        <item>misty_whitesand</item>
+        <item>misty_pink</item>
+        <item>misty_roybush</item>
+        <item>misty_blood</item>
+        <item>misty_bamboo</item>
+        <item>misty_brown</item>
+    </string-array>
+
+
+</resources>

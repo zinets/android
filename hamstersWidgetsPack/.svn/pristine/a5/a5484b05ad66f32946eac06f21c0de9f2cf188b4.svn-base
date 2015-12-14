@@ -1,0 +1,89 @@
+package info.hamster.widgets.providers;
+
+import android.content.Context;
+import android.content.Intent;
+import android.database.ContentObserver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Handler;
+import android.provider.CallLog;
+import android.text.Html;
+import android.util.Log;
+import info.hamster.widgets.Config;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: zinetz
+ * Date: 29.04.11
+ */
+
+public class MissedCallsProvider extends ContentObserver {
+
+    private Context mContext = null;
+    private String lastCallTime = "";
+
+    public MissedCallsProvider(Context context) {
+        super(null);
+
+        mContext = context;
+        this.onChange(true);
+    }
+
+    private int getMissedCalls() {
+        int res = -1;
+        lastCallTime = "";
+
+        try {
+            if (mContext != null) {
+                Cursor c = mContext.getContentResolver().query(
+                        Config.MissedCallsUri, null,
+                        CallLog.Calls.TYPE + " = ? AND " + CallLog.Calls.NEW + " = ?",
+                        new String[]{Integer.toString(CallLog.Calls.MISSED_TYPE), "1"},
+                        CallLog.Calls.DATE + " DESC");
+                if (c != null) {
+                    res = c.getCount();
+                    if (res > 0) {
+                        c.moveToFirst();
+
+                        long t = c.getLong(c.getColumnIndexOrThrow(CallLog.Calls.DATE));
+                        Date nDate = new Date(t);
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(nDate);
+                        int iHour = cal.get(Calendar.HOUR);
+                        int iMin = cal.get(Calendar.MINUTE);
+
+                        lastCallTime = String.format("%1$02d:%2$02d", iHour, iMin);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("MissedCallsProvider", "Unexpected exception in getMissedCalls: " + e.getLocalizedMessage());
+        } finally {
+            return res;
+        }
+    }
+
+    @Override
+    public void onChange(boolean selfChange) {
+
+        if (Config.LOGGING)
+            Config.Log("MissedCallsProvider fired..");
+
+        final int missedCalls = getMissedCalls();
+        if (mContext != null) {
+            Intent intent = new Intent("info.hamster.widgets.time_to_update");
+            intent.putExtra(Config.MissedCallsCountExtra, missedCalls);
+            if (!lastCallTime.equals(""))
+                intent.putExtra(Config.MissedCallTimeExtra, lastCallTime);
+
+            mContext.sendBroadcast(intent);
+        }
+
+        if (Config.LOGGING)
+            Config.Log(".. missed calls count - " + missedCalls + ", time: " + lastCallTime);
+    }
+}

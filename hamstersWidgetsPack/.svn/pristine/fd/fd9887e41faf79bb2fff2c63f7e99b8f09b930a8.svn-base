@@ -1,0 +1,54 @@
+package info.hamster.widgets;
+
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 11.02.11
+ */
+
+public class BaseWidgetProvider extends AppWidgetProvider {
+
+    final protected static String TAG = "hamster's widgets pack:";
+
+    @Override
+    public void onEnabled(Context context) {
+        context.startService(new Intent(context, WidgetService.class));
+    }
+
+    @Override
+    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        context.startService(new Intent(context, WidgetService.class));
+    }
+
+    @Override
+    public void onDisabled(Context context) {
+
+        int widgetCount = 0;
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+
+        ComponentName thisWidget = new ComponentName(context,
+                info.hamster.widgets.wide_clock.WideClockWidget.class);
+        widgetCount += appWidgetManager.getAppWidgetIds(thisWidget).length;
+
+//        thisWidget = new ComponentName(context,
+//                info.hamster.widgets.minimal_clock.MinimalClockWidget.class);
+//        widgetCount += appWidgetManager.getAppWidgetIds(thisWidget).length;
+//
+//        thisWidget = new ComponentName(context,
+//                info.hamster.widgets.wide_1x4_clock.Wide1x4ClockWidget.class);
+//        widgetCount += appWidgetManager.getAppWidgetIds(thisWidget).length;
+//
+//        thisWidget = new ComponentName(context,
+//                info.hamster.widgets.compact_clock.Compact1x4ClockWidget.class);
+//        widgetCount += appWidgetManager.getAppWidgetIds(thisWidget).length;
+
+        if (widgetCount == 0)
+            context.stopService(new Intent(context, WidgetService.class));
+    }
+}

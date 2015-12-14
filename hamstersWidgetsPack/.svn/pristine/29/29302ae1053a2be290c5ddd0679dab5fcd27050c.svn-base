@@ -1,0 +1,23 @@
+package info.hamster.widgets;
+
+import android.util.Log;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 09.04.11
+ */
+
+public class Config {
+
+    final static String TAG = "hamster's widgets pack";
+
+    public final static boolean LOGGING = true;
+    public final static boolean TESTING = true;
+
+    public static void Log(String LogMessage) {
+        if (LOGGING)
+            Log.d(TAG, LogMessage);
+    }
+
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+            android:title="@string/clock_options">
+        <CheckBoxPreference
+                android:title="@string/time_format"
+                android:defaultValue="true"
+                android:summaryOn="@string/use_24time_format"
+                android:summaryOff="@string/use_12time_format"
+                android:key="timeFormat"/>
+    </PreferenceCategory>
+</PreferenceScreen>

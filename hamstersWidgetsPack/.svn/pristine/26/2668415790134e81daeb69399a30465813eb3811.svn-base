@@ -1,0 +1,64 @@
+package info.hamster.widgets;
+
+import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.IBinder;
+import android.util.Log;
+import info.hamster.widgets.wide_clock.WideClockWidget;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 11.02.11
+ */
+public class WidgetService extends Service {
+
+    final private String TAG = "hamster's widgets pack:";
+    private TimeEventsReceiver timeEventsReceiver = null;
+
+    private class TimeEventsReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            WideClockWidget.UpdateWidget(context);
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public void onStart(Intent intent, int startId) {
+
+        super.onStart(intent, startId);
+
+        if (timeEventsReceiver == null) {
+            timeEventsReceiver = new TimeEventsReceiver();
+            registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+            registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_TIME_CHANGED));
+            registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED));
+            registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_DATE_CHANGED)); // TODO: не дубль ли это?
+            registerReceiver(timeEventsReceiver, new IntentFilter("info.hamster.widgets.time_to_update"));
+
+            Log.d(TAG, "receiver created.");
+        }
+
+        timeEventsReceiver.onReceive(this, intent);
+        Log.d(TAG, "Service started.");
+    }
+
+    @Override
+    public void onDestroy() {
+
+        unregisterReceiver(timeEventsReceiver);
+        timeEventsReceiver = null;
+
+        Log.d(TAG, "Broadcaster unregistered, service stopping");
+        super.onDestroy();
+    }
+}

@@ -1,0 +1,133 @@
+package info.hamster.widgets;
+
+import android.app.ProgressDialog;
+import android.appwidget.AppWidgetManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.SystemClock;
+import android.preference.ListPreference;
+import android.preference.PreferenceActivity;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
+import java.util.List;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 10.02.11
+ */
+public class BaseClockConfig extends PreferenceActivity {
+
+    final protected String TAG = "hamster's widgets pack:";
+
+    protected int mNewWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+
+    protected static String appLabels[] = null,
+            appPackageNames[] = null,
+            appActivityNames[] = null;
+
+    protected void fillApplications(boolean force_update) {
+
+        if (force_update || (appLabels == null)) {
+            final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+            mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            final List<ResolveInfo> pkgAppsList = this.getPackageManager().queryIntentActivities(mainIntent, 0);
+
+            appLabels = new String[pkgAppsList.size()];
+            appActivityNames = new String[pkgAppsList.size()];
+            appPackageNames = new String[pkgAppsList.size()];
+
+            int i = 0;
+            PackageManager pm = this.getPackageManager();
+
+            for (ResolveInfo info : pkgAppsList) {
+                appLabels[i] = info.loadLabel(pm).toString();
+                appPackageNames[i] = info.activityInfo.packageName;
+                appActivityNames[i++] = info.activityInfo.name;
+            }
+        }
+    }
+
+    private class bgFilling extends AsyncTask<Void, Void, Void> {
+        private ProgressDialog progress;
+
+        @Override
+        protected void onPreExecute() {
+            progress = ProgressDialog.show(BaseClockConfig.this, null, "Creating a list of installed applications..", true);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            fillApplications(false);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+
+            ListPreference list = (ListPreference) findPreference("clockAction");
+            if (list != null) {
+                list.setEntries(appLabels);
+                list.setEntryValues(appPackageNames);
+            }
+            list = (ListPreference) findPreference("dateAction");
+            if (list != null) {
+                list.setEntries(appLabels);
+                list.setEntryValues(appPackageNames);
+            }
+
+            progress.dismiss();
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+
+        if (extras != null) {
+            mNewWidgetId = extras.getInt(
+                    AppWidgetManager.EXTRA_APPWIDGET_ID,
+                    AppWidgetManager.INVALID_APPWIDGET_ID);
+            if (Config.LOGGING)
+                Log.d(TAG, "widget ID = " + mNewWidgetId);
+        } else {
+            finish();
+        }
+
+        new bgFilling().execute();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        Intent broadcast = new Intent("info.hamster.widgets.time_to_update");
+        sendBroadcast(broadcast);
+
+        finish();
+
+        return true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+}

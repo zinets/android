@@ -1,0 +1,78 @@
+package info.hamster.widgets;
+
+import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.IBinder;
+import android.util.Log;
+import info.hamster.widgets.compact_clock.CompactClock2x1Widget;
+import info.hamster.widgets.compact_clock.CompactClockWidget;
+import info.hamster.widgets.minimal_clock.MinimalClockWidget;
+import info.hamster.widgets.misty_blur.MistyClockWidget;
+import info.hamster.widgets.wide_clock_4x1.WideClock4x1Widget;
+import info.hamster.widgets.wide_clock_4x2.WideClock4x2Widget;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 11.02.11
+ */
+public class WidgetService extends Service {
+
+    final private String TAG = "hamster's widgets pack:";
+
+    private TimeEventsReceiver timeEventsReceiver = null;
+    public static boolean ServiceStarted = false;
+
+    private class TimeEventsReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            WideClock4x2Widget.UpdateWidget(context);
+            WideClock4x1Widget.UpdateWidget(context);
+            MinimalClockWidget.UpdateWidget(context);
+            CompactClockWidget.UpdateWidget(context);
+            CompactClock2x1Widget.UpdateWidget(context);
+            MistyClockWidget.UpdateWidget(context);
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        if (timeEventsReceiver == null)
+            timeEventsReceiver = new TimeEventsReceiver();
+
+        registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+        registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_TIME_CHANGED));
+        registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED));
+        registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_DATE_CHANGED));
+        registerReceiver(timeEventsReceiver, new IntentFilter("info.hamster.widgets.time_to_update"));
+
+        Log.d(TAG, "receiver created.");
+
+        timeEventsReceiver.onReceive(this, intent);
+        ServiceStarted = true;
+
+        return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+
+        unregisterReceiver(timeEventsReceiver);
+        timeEventsReceiver = null;
+
+        Log.d(TAG, "Broadcaster unregistered, service stopping");
+
+        ServiceStarted = false;
+        super.onDestroy();
+    }
+}

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">hamster\'s widgets pack</string>
+    <string name="service_name">hamster\'s monitoring service</string>
+    <string name="option_activity_title">Настройка виджета</string>
+
+    <string name="wide_clock_4x2_title">1) wide clock 4x2</string>
+    <string name="minimal_clock_title">hw: минималитик</string>
+    <string name="wide_clock_4x1_title">hw: 4x1 часы</string>
+    <string name="compact_4x1_clock_title">hw: просточасы</string>
+    <string name="compact_2x1_clock_title">5)simple 2x1 clock</string>
+    <string name="misty_blur_clock_title">hw: лента</string>
+    <string name="wall_clock_title">hw: графити</string>
+    <string name="analog_clock_title">hw: аналоговые часы</string>
+
+    <string name="clock_options">Настройки часов</string>
+
+    <string name="time_format">12/24 формат</string>
+    <string name="use_24time_format">Использовать 24-часовой формат</string>
+    <string name="use_12time_format">Использовать 12-часовой формат</string>
+
+    <string name="behavior">Поведение</string>
+    <string name="clock_tap_title">Тап по часам</string>
+    <string name="date_tap_title">Тап по дате</string>
+    <string name="clock_tap_summary">Укажите приложение для запуска после тапа по часам</string>
+    <string name="date_tap_summary">Укажите приложение для запуска после тапа по дате</string>
+
+    <string name="color_selection">Настройки цвета</string>
+
+    <string name="weekday_color">Цвет: сегодня</string>
+    <string name="weekdat_color_summary">Укажите, каким цветом показывать текущий день недели</string>
+
+    <string name="weekday_inactive_color">Цвет: день недели</string>
+    <string name="weekday_inactive_color_summary">Укажите, каким цветом показывать остальные дни недели</string>
+
+    <string name="clock_color">Цвет: часы</string>
+    <string name="clock_color_summary">Укажите цвет, которым следует выводить показания часов</string>
+
+    <string name="date_color">Цвет: дата</string>
+    <string name="date_color_summary">Укажите цвет, которым следует выводить текущую дату</string>
+
+    <string name="apply_widget_config">Применить изменения</string>
+
+    <string name="widget_just_title">Выравнивание виджета</string>
+    <!--string name="widget_just_summary">Выравнивание элементов виджета</string -->
+
+    <string name="widget_theme_title">Тема</string>
+    <string name="widget_theme_summary">Тема виджета</string>
+    <string name="widget_random_theme">Использовать указанную тему</string>
+    <string name="widget_random_theme_summary_on">Будет использована выбранная тема</string>
+    <string name="widget_random_theme_summary_off">Будет использована случайная тема</string>
+
+    <string name="widget_theme_inverted_color_title">Темные оттенки</string>
+    <string name="widget_theme_use_light_summary">Светлая тема</string>
+    <string name="widget_theme_use_dark_summary">Темная тема</string>
+
+    <string name="theme_dialog_title">Выбор темы</string>
+
+    <string name="widget_hint">Сделайте тап по виджету, чтобы настроить его внешний вид и поведение</string>
+    <string name="widget_hint2">Чтобы настройки вступили в силу, нажмите "Меню"->"Применить изменения"</string>
+
+    <string name="use_alt_action">Обработка пропущенных событий</string>
+    <string name="alt_action_summary_on">Будут показаны пропущенные (например список пропущенных звонков)</string>
+    <string name="alt_action_summary_off">Будет запущено указанное приложение</string>
+
+    <!-- ^^ ver 1.2 ^^ -->
+
+</resources>

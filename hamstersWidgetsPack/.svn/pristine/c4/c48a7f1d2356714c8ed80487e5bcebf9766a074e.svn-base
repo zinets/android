@@ -1,0 +1,123 @@
+package info.hamster.widgets.minimal_clock;
+
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
+import android.view.MenuItem;
+import info.hamster.widgets.BaseClockConfig;
+import info.hamster.widgets.R;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 18.02.11
+ */
+public class MinimalClockWidgetConfig extends BaseClockConfig {
+
+    // preferences prefixes
+    static final String TimeFormatPrefix = "timeFormat_minimalClock";
+    static final String ClockActionPrefix = "clockActivity_minimalClock";
+    static final String ClockActivityPrefix = "clockAction_minimalClock";
+    static final String DateActionPrefix = "dateActivity_minimalClock";
+    static final String DateActivityPrefix = "dateAction_minimalClock";
+    static final String WidgetPlacePrefix = "widgetPlace_minimalClock";
+    static final String WidgetThemePrefix = "widgetTheme_minimalClock";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+
+        addPreferencesFromResource(R.xml.minimal_clock_config);
+
+        final ListPreference listClockActions = (ListPreference) findPreference("clockAction");
+        listClockActions.setEntries(appLabels);
+        listClockActions.setEntryValues(appPackageNames);
+
+        final ListPreference listDateActions = (ListPreference) findPreference("dateAction");
+        listDateActions.setEntries(appLabels);
+        listDateActions.setEntryValues(appPackageNames);
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        listClockActions.setOnPreferenceChangeListener(
+                new Preference.OnPreferenceChangeListener() {
+                    public boolean onPreferenceChange(Preference preference, Object o) {
+                        int i = ((ListPreference) preference).findIndexOfValue(o.toString());
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString(ClockActivityPrefix + mNewWidgetId, appActivityNames[i]);
+                        editor.putString(ClockActionPrefix + mNewWidgetId, appPackageNames[i]);
+                        editor.commit();
+
+                        return true;
+                    }
+                }
+        );
+
+        listDateActions.setOnPreferenceChangeListener(
+                new Preference.OnPreferenceChangeListener() {
+                    public boolean onPreferenceChange(Preference preference, Object o) {
+                        int i = ((ListPreference) preference).findIndexOfValue(o.toString());
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString(DateActivityPrefix + mNewWidgetId, appActivityNames[i]);
+                        editor.putString(DateActionPrefix + mNewWidgetId, appPackageNames[i]);
+                        editor.commit();
+
+                        return true;
+                    }
+                }
+        );
+
+        final ListPreference listWidgetPlaces = (ListPreference) findPreference("widgetPlace");
+        listWidgetPlaces.setOnPreferenceChangeListener(
+                new Preference.OnPreferenceChangeListener() {
+                    public boolean onPreferenceChange(Preference preference, Object o) {
+                        int i = ((ListPreference) preference).findIndexOfValue(o.toString());
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putInt(WidgetPlacePrefix + mNewWidgetId, i);
+                        editor.commit();
+                        return true;
+                    }
+                }
+        );
+
+        final ListPreference listWidgetThemes = (ListPreference) findPreference("widgetTheme");
+        listWidgetThemes.setOnPreferenceChangeListener(
+                new Preference.OnPreferenceChangeListener() {
+                    public boolean onPreferenceChange(Preference preference, Object o) {
+
+                        int i = ((ListPreference) preference).findIndexOfValue(o.toString());
+                        SharedPreferences.Editor editor = prefs.edit();
+
+                        editor.putInt(WidgetThemePrefix + mNewWidgetId, i);
+                        editor.commit();
+
+                        return true;
+                    }
+                }
+        );
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        // надо сохранить:
+        // 1. формат даты
+        final CheckBoxPreference pref = (CheckBoxPreference) findPreference("timeFormat");
+        editor.putBoolean(TimeFormatPrefix + mNewWidgetId, pref.isChecked());
+
+        // 2. выбор для тапа по часам
+        //      сохраняется выше
+        // 3. выбор для тапа по дате
+        //      сохраняется выше
+
+        editor.commit();
+        return super.onOptionsItemSelected(item);
+    }
+
+}

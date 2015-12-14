@@ -1,0 +1,181 @@
+package info.hamster.widgets.misty_blur;
+
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.MenuItem;
+import info.hamster.widgets.BaseClockConfig;
+import info.hamster.widgets.ColorPickerDialog;
+import info.hamster.widgets.R;
+import info.hamster.widgets.ThemeSelector;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 19.02.11
+ */
+public class MistyClockWidgetConfig extends BaseClockConfig {
+
+    // preferences prefixes
+    static final String TimeFormatPrefix = "timeFormat_misty";
+    static final String ClockActionPrefix = "clockActivity_misty";
+    static final String ClockActivityPrefix = "clockAction_misty";
+    static final String ClockActionIndex = "clockActionIndex_misty";
+    static final String ClockColorPrefix = "clockColor_misty";
+    static final String DateColorPrefix = "dateColor_misty";
+    static final String ThemePrefix = "theme_misty";
+    static final String WeekDaysColorPrefix = "weekDaysColor_misty";
+    static final String WeekDaysInactiveColorPrefix = "weekDaysInactiveColor_misty";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+        addPreferencesFromResource(R.xml.misty_clock_config);
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        final CheckBoxPreference timeFormat = (CheckBoxPreference) findPreference("timeFormat");
+        timeFormat.setChecked(prefs.getBoolean(TimeFormatPrefix + mNewWidgetId, true));
+
+        final ListPreference listClockActions = (ListPreference) findPreference("clockAction");
+        listClockActions.setEntries(appLabels);
+        listClockActions.setEntryValues(appPackageNames);
+        listClockActions.setValueIndex(prefs.getInt(ClockActionIndex + mNewWidgetId, 0));
+
+        final ThemeSelector themePreference = (ThemeSelector) findPreference("widgetTheme");
+        themePreference.setOnPreferenceChangeListener(
+                new ThemeSelector.OnPreferenceChangeListener() {
+                    public boolean onPreferenceChange(Preference preference, Object o) {
+
+                        int theme = (Integer) o;
+                        Log.d(TAG, "theme = " + Integer.toHexString(theme));
+
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putInt(ThemePrefix + mNewWidgetId, theme);
+
+                        editor.commit();
+
+                        return true;
+                    }
+                }
+        );
+
+        listClockActions.setOnPreferenceChangeListener(
+                new Preference.OnPreferenceChangeListener() {
+                    public boolean onPreferenceChange(Preference preference, Object o) {
+                        int i = ((ListPreference) preference).findIndexOfValue(o.toString());
+
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString(ClockActivityPrefix + mNewWidgetId, appActivityNames[i]);
+                        editor.putString(ClockActionPrefix + mNewWidgetId, appPackageNames[i]);
+                        editor.putInt(ClockActionIndex + mNewWidgetId, i);
+                        editor.commit();
+
+                        return true;
+                    }
+                }
+        );
+
+        Preference colorPref = findPreference("clockColor");
+        colorPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+            public boolean onPreferenceClick(Preference preference) {
+
+                int color = prefs.getInt(ClockColorPrefix + mNewWidgetId, Color.WHITE);
+                new ColorPickerDialog(MistyClockWidgetConfig.this, new ColorPickerDialog.OnColorChangedListener() {
+                    public void colorChanged(int color) {
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putInt(ClockColorPrefix + mNewWidgetId, color);
+                        editor.commit();
+                    }
+                }, color).show();
+
+                return true;
+            }
+        });
+
+        colorPref = findPreference("dateColor");
+        colorPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+            public boolean onPreferenceClick(Preference preference) {
+
+                int color = prefs.getInt(DateColorPrefix + mNewWidgetId, Color.WHITE);
+
+
+                new ColorPickerDialog(MistyClockWidgetConfig.this, new ColorPickerDialog.OnColorChangedListener() {
+                    public void colorChanged(int color) {
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putInt(DateColorPrefix + mNewWidgetId, color);
+                        editor.commit();
+                    }
+                }, color).show();
+
+                return true;
+            }
+        });
+
+        colorPref = findPreference("weekDaysColor");
+        colorPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+            public boolean onPreferenceClick(Preference preference) {
+
+                int color = prefs.getInt(WeekDaysColorPrefix + mNewWidgetId, Color.WHITE);
+
+
+                new ColorPickerDialog(MistyClockWidgetConfig.this, new ColorPickerDialog.OnColorChangedListener() {
+                    public void colorChanged(int color) {
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putInt(WeekDaysColorPrefix + mNewWidgetId, color);
+                        editor.commit();
+                    }
+                }, color).show();
+
+                return true;
+            }
+        });
+
+        colorPref = findPreference("weekDaysInactiveColor");
+        colorPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+            public boolean onPreferenceClick(Preference preference) {
+
+                int color = prefs.getInt(WeekDaysInactiveColorPrefix + mNewWidgetId, Color.WHITE);
+
+                new ColorPickerDialog(MistyClockWidgetConfig.this, new ColorPickerDialog.OnColorChangedListener() {
+                    public void colorChanged(int color) {
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putInt(WeekDaysInactiveColorPrefix + mNewWidgetId, color);
+                        editor.commit();
+                    }
+                }, color).show();
+
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        // надо сохранить:
+        // 1. формат даты
+        final CheckBoxPreference pref = (CheckBoxPreference) findPreference("timeFormat");
+        editor.putBoolean(TimeFormatPrefix + mNewWidgetId, pref.isChecked());
+
+        // 2. выбор для тапа по часам
+        //      сохраняется выше
+        // 3. выбор для тапа по дате
+        //      сохраняется выше
+
+        editor.commit();
+        return super.onOptionsItemSelected(item);
+    }
+}

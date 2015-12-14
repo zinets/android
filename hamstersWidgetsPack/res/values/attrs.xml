@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ThemeSelectorPreferences">
+        <attr name="themeImage" format="reference"/>
+        <attr name="themeClockColor" format="integer"/>
+    </declare-styleable>
+</resources>

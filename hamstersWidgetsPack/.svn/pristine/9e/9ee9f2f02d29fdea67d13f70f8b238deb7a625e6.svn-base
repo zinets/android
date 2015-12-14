@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+
+    <RelativeLayout
+            android:id="@+id/idMinimal_TimeAction"
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            >
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dip"
+                android:gravity="left"
+                >
+            <ImageView
+                    android:id="@+id/idMinimal_Hour1"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:src="@drawable/d01"/>
+            <ImageView
+                    android:id="@+id/idMinimal_Hour2"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:src="@drawable/d03"/>
+        </LinearLayout>
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="60dip"
+                android:gravity="left"
+                >
+            <ImageView
+                    android:id="@+id/idMinimal_Min1"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:src="@drawable/r03"/>
+            <ImageView
+                    android:id="@+id/idMinimal_Min2"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:src="@drawable/r04"/>
+        </LinearLayout>
+        <TextView
+                android:id="@+id/idMinimal_AmPm"
+                android:text="AM"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dip"
+                android:layout_marginRight="5dip"
+                />
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+            android:id="@+id/idMinimal_DateAction"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="bottom|center_horizontal"
+            android:orientation="vertical">
+        <TextView
+                android:id="@+id/idMinimal_DayOfWeek"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:text="SUNDAY"
+                android:textColor="#f86b2d"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:gravity="left"
+                android:layout_marginRight="3dip"
+                android:layout_marginLeft="3dip"
+                />
+        <TextView
+                android:id="@+id/idMinimal_Date"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:text="31 DECEMBER"
+                android:textColor="#f7f2f2"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:gravity="left"
+                android:layout_marginRight="3dip"
+                android:layout_marginLeft="3dip"
+                />
+
+    </LinearLayout>
+
+</LinearLayout>

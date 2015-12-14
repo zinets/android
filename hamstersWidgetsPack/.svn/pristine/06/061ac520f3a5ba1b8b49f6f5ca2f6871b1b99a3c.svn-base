@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+            android:entries="@array/placements"
+            android:entryValues="@array/placement_values"
+            android:title="@string/widget_just_title"
+            android:key="widgetPlace"
+            android:summary="@string/widget_just_title"
+            android:defaultValue="0"/>
+    <ListPreference
+            android:entries="@array/color_themes"
+            android:entryValues="@array/color_themes_values"
+            android:title="@string/widget_theme_title"
+            android:key="widgetTheme"
+            android:summary="@string/widget_theme_summary"
+            android:defaultValue="0"/>
+
+    <PreferenceCategory
+            android:title="@string/behavior">
+        <ListPreference
+                android:title="@string/clock_tap_title"
+                android:summary="@string/clock_tap_summary"
+                android:key="clockAction"
+                android:defaultValue="0"/>
+        <ListPreference
+                android:title="@string/date_tap_title"
+                android:summary="@string/date_tap_summary"
+                android:key="dateAction"
+                android:defaultValue="0"/>
+    </PreferenceCategory>
+</PreferenceScreen>

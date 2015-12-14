@@ -1,0 +1,116 @@
+package info.hamster.widgets.wide_clock_4x2;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.text.format.DateFormat;
+import android.widget.RemoteViews;
+import info.hamster.widgets.R;
+
+import java.util.Calendar;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 11.02.11
+ */
+public class WideClock4x2Widget extends info.hamster.widgets.BaseWidgetProvider {
+
+    private static final int wide_map[] = {
+            R.drawable.digits30, R.drawable.digits31, R.drawable.digits32,
+            R.drawable.digits33, R.drawable.digits34, R.drawable.digits35,
+            R.drawable.digits36, R.drawable.digits37, R.drawable.digits38,
+            R.drawable.digits39
+    };
+
+    private static final String days_map[] = {
+            "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"
+    };
+
+    static public void UpdateWidget(Context context) {
+
+        Calendar curDateTime = Calendar.getInstance();
+        final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        final ComponentName thisWidget = new ComponentName(context, WideClock4x2Widget.class);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+        for (int appWidgetId : appWidgetIds) {
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.wide_clock_4x2);
+            boolean am = (!prefs.getBoolean(WideClock4x2WidgetConfig.TimeFormatPrefix + appWidgetId, true));
+
+            int c = curDateTime.get(Calendar.HOUR_OF_DAY);
+            if (am && (c > 12))
+                c -= 12;
+            views.setImageViewResource(R.id.idHour1, wide_map[c / 10]);
+            views.setImageViewResource(R.id.idHour2, wide_map[c % 10]);
+
+            c = curDateTime.get(Calendar.MINUTE);
+            views.setImageViewResource(R.id.idMin1, wide_map[c / 10]);
+            views.setImageViewResource(R.id.idMin2, wide_map[c % 10]);
+
+            views.setTextViewText(R.id.idYear, " /" + Integer.toString(curDateTime.get(Calendar.YEAR)));
+            views.setTextViewText(R.id.idMonth, DateFormat.format("MM", curDateTime) + "/ ");
+            views.setTextViewText(R.id.idDayOfMonth, DateFormat.format("dd", curDateTime));
+
+            c = curDateTime.get(Calendar.DAY_OF_WEEK);
+            int x = c;
+            views.setTextViewText(R.id.idDayOfWeek, days_map[x - 1]);
+
+            String temp = "";
+            for (int i = 0; i < 2; i++) {
+                x--;
+                if (x == 0) x = Calendar.SATURDAY;
+                temp = days_map[x - 1] + " " + temp;
+            }
+            views.setTextViewText(R.id.idDaysBefore, temp);
+
+            temp = "";
+            x = c;
+            for (int i = 0; i < 2; i++) {
+                x++;
+                if (x == 8)
+                    x = Calendar.SUNDAY;
+                temp = temp + " " + days_map[x - 1];
+            }
+            views.setTextViewText(R.id.idDaysAfter, temp);
+            // Log.d(TAG, "WideClock#" + appWidgetId + " updated date");
+
+            String action = prefs.getString(WideClock4x2WidgetConfig.ClockActionPrefix + appWidgetId, "");
+            if (!action.equals("")) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                ComponentName name = new ComponentName(action, prefs.getString(WideClock4x2WidgetConfig.ClockActivityPrefix + appWidgetId, ""));
+
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                intent.setComponent(name);
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                views.setOnClickPendingIntent(R.id.idClockSection, pendingIntent);
+                // Log.d(TAG, "WideClock#" + appWidgetId + " updated clock click");
+            }
+
+            action = prefs.getString(WideClock4x2WidgetConfig.DateActionPrefix + appWidgetId, "");
+            if (!action.equals("")) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                ComponentName name = new ComponentName(action, prefs.getString(WideClock4x2WidgetConfig.DateActivityPrefix + appWidgetId, ""));
+
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                intent.setComponent(name);
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                views.setOnClickPendingIntent(R.id.idDateSection, pendingIntent);
+                views.setOnClickPendingIntent(R.id.idWeekDaySection, pendingIntent);
+                // Log.d(TAG, "WideClock#" + appWidgetId + " updated date click");
+            }
+
+            appWidgetManager.updateAppWidget(appWidgetId, views);
+            // Log.d(TAG, "WideClock#" + appWidgetId + " updated");
+        }
+
+    }
+}

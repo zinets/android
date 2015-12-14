@@ -1,0 +1,128 @@
+package info.hamster.widgets;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.res.TypedArray;
+import android.preference.ListPreference;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: zinetz
+ * Date: 22.02.11
+ * Time: 13:00
+ */
+public class ThemeSelector extends ListPreference {
+
+    final static String TAG = "Custom List Preference:";
+
+    protected CustomListAdapter listAdapter;
+    protected Context mContext;
+
+    public ThemeSelector(Context context) {
+        super(context);
+        mContext = context;
+    }
+
+    public ThemeSelector(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        mContext = context;
+
+        listAdapter = new CustomListAdapter();
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.ThemeSelectorPreferences);
+
+        String[] imageNames = context.getResources().getStringArray(typedArray.getResourceId(0, 0));
+
+        for (int x = 0; x < imageNames.length; x++) {
+            String imageName = "@drawable/" + imageNames[x];
+            listAdapter.addItem(
+                    new ThemeListItem(context.getResources().
+                            getIdentifier(imageName, null, context.getPackageName()))
+            );
+        }
+
+        typedArray.recycle();
+    }
+
+    @Override
+    protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
+
+        builder.setAdapter(listAdapter, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int i) {
+                callChangeListener(Integer.valueOf(i));
+            }
+        });
+        builder.setPositiveButton(null, null);
+    }
+
+    protected static class ThemeListItem {
+
+        public int ThemeName;
+
+        public ThemeListItem(final int themeName) {
+            ThemeName = themeName;
+        }
+    }
+
+    public static class ListItemHolder {
+        public ImageView imageView;
+    }
+
+    protected class CustomListAdapter extends BaseAdapter {
+
+        private List<ThemeListItem> items = new ArrayList<ThemeListItem>();
+        private LayoutInflater mInflater;
+
+        public CustomListAdapter() {
+            mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        public int getCount() {
+            return items.size();
+        }
+
+        public Object getItem(int i) {
+            return items.get(i);
+        }
+
+        public long getItemId(int i) {
+            return i;
+        }
+
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            ListItemHolder holder = null;
+
+            if (view == null) {
+                view = mInflater.inflate(R.layout.theme_list_item, null);
+                holder = new ListItemHolder();
+                holder.imageView = (ImageView) view.findViewById(R.id.idImageView);
+                view.setTag(holder);
+            } else {
+                holder = (ListItemHolder) view.getTag();
+            }
+
+            ThemeListItem item = (ThemeListItem) items.get(i);
+            holder.imageView.setBackgroundResource(item.ThemeName);
+
+            return view;
+        }
+
+        public void addItem(final ThemeListItem newItem) {
+
+            items.add(newItem);
+
+            notifyDataSetChanged();
+        }
+    }
+}

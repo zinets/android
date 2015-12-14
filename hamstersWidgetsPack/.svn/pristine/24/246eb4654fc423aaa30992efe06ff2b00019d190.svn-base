@@ -1,0 +1,262 @@
+package info.hamster.widgets;
+
+import android.app.Service;
+import android.content.*;
+import android.database.ContentObserver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Handler;
+import android.os.IBinder;
+import android.provider.CallLog;
+import android.util.Log;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 11.02.11
+ */
+public class WidgetService extends Service {
+
+    final private Uri smsUri = Uri.parse("content://sms/");
+    final private Uri callsUri = CallLog.Calls.CONTENT_URI;
+    private Uri calendarUri;
+    final Uri gmailUri = Uri.parse("content://gmail-ls/labels/");
+
+    private TimeEventsReceiver timeEventsReceiver = null;
+    private CallsEventsObserver callsEventsObserver = null;
+    private SmsEventsObserver smsEventsObserver = null;
+    private CalendarEventsObserver calendarObserver = null;
+    private GMailObserver gmailObserver = null;
+
+    public static boolean ServiceStarted = false;
+    public static int missedCallsCount = -1;
+    public static int unreadSmsCount = -1;
+    public static int alertsCount = -1;
+    public static int unreadedMail = -1;
+
+    private class GMailObserver extends ContentObserver {
+
+        private Uri uri;
+
+        public void registerSelf(String account) {
+
+            uri = Uri.withAppendedPath(gmailUri, account);
+            getGMailCount();
+
+            final ContentResolver cr = getApplicationContext().getContentResolver();
+            cr.registerContentObserver(uri, true, this);
+        }
+
+        public void unregisterSelf() {
+            final ContentResolver cr = getApplicationContext().getContentResolver();
+            cr.unregisterContentObserver(this);
+        }
+
+        public GMailObserver() {
+            super(null);
+        }
+
+        protected void getGMailCount() {
+
+            Cursor cursor = getContentResolver().query(
+                    uri,
+                    new String[]{"canonicalName", "numUnreadConversations"},
+                    null, null, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+
+                unreadedMail = 0;
+                while (cursor.moveToNext()) {
+                    String name = cursor.getString(0);
+                    if (name.equals("^i")) {
+                        unreadedMail = cursor.getInt(1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+
+            final int t = unreadedMail;
+            getGMailCount();
+            if (t != unreadedMail)
+                getApplicationContext().sendBroadcast(new Intent("info.hamster.widgets.time_to_update"));
+
+        }
+    }
+
+    private class CalendarEventsObserver extends ContentObserver {
+
+        public CalendarEventsObserver() {
+            super(null);
+
+            if (Build.VERSION.SDK_INT == 7) // android 2.1
+                calendarUri = Uri.parse("content://calendar/calendar_alerts");
+            else if (Build.VERSION.SDK_INT > 7) //android 2.2
+                calendarUri = Uri.parse("content://com.android.calendar/calendar_alerts");
+
+            getAlertCount();
+        }
+
+        protected void getAlertCount() {
+            final Cursor c = getContentResolver().
+                    query(calendarUri, null, "state = ? or state = ?", new String[]{"0", "1"}, null);
+            if (c != null)
+                alertsCount = c.getCount();
+            else
+                alertsCount = 0;
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            final int t = alertsCount;
+            getAlertCount();
+            if (t != alertsCount)
+                getApplicationContext().sendBroadcast(new Intent("info.hamster.widgets.time_to_update"));
+        }
+    }
+
+    private class SmsEventsObserver extends ContentObserver {
+
+        public SmsEventsObserver() {
+            super(null);
+
+            getUnreadedSms();
+        }
+
+        protected void getUnreadedSms() {
+
+            Cursor c = getContentResolver().query(
+                    smsUri, null,
+                    "read = ?", new String[]{"0"},
+                    "date DESC");
+            unreadSmsCount = c.getCount();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+
+            Config.Log("sms observer fired!");
+            final int t = unreadSmsCount;
+            getUnreadedSms();
+            if (t != unreadSmsCount)
+                getApplicationContext().sendBroadcast(new Intent("info.hamster.widgets.time_to_update"));
+        }
+    }
+
+    private class CallsEventsObserver extends ContentObserver {
+
+        public CallsEventsObserver() {
+            super(null);
+
+            getMissedCalls();
+        }
+
+        protected void getMissedCalls() {
+            Cursor c = getContentResolver().query(
+                    callsUri,
+                    null,
+                    CallLog.Calls.TYPE + " = ? AND " + CallLog.Calls.NEW + " = ?",
+                    new String[]{Integer.toString(CallLog.Calls.MISSED_TYPE), "1"},
+                    CallLog.Calls.DATE + " DESC"
+            );
+
+            missedCallsCount = c.getCount();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            final int t = missedCallsCount;
+            getMissedCalls();
+            if (t != missedCallsCount) {
+                getApplicationContext().sendBroadcast(new Intent("info.hamster.widgets.time_to_update"));
+            }
+        }
+    }
+
+    private class TimeEventsReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Config.Log("incoming broadcast..");
+            if (missedCallsCount < 0)
+                callsEventsObserver.getMissedCalls();
+
+            smsEventsObserver.getUnreadedSms(); // потому что не получаю сообщения об изменении "прочитанности" смс
+
+            getApplicationContext().sendBroadcast(new Intent("info.hamster.widgets.time_to_update"));
+
+            Config.Log("widgets updated.");
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        final ContentResolver cr = getApplicationContext().getContentResolver();
+        if (callsEventsObserver == null)
+            callsEventsObserver = new CallsEventsObserver();
+        cr.registerContentObserver(callsUri, true, callsEventsObserver);
+
+        if (smsEventsObserver == null)
+            smsEventsObserver = new SmsEventsObserver();
+        cr.registerContentObserver(smsUri, true, smsEventsObserver);
+
+        if (timeEventsReceiver == null)
+            timeEventsReceiver = new TimeEventsReceiver();
+        registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+        registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_TIME_CHANGED));
+        registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED));
+        registerReceiver(timeEventsReceiver, new IntentFilter(Intent.ACTION_DATE_CHANGED));
+
+        if (Config.TESTING) {
+            if (calendarObserver == null)
+                calendarObserver = new CalendarEventsObserver();
+            cr.registerContentObserver(calendarUri, true, calendarObserver);
+
+            if (gmailObserver == null) {
+                gmailObserver = new GMailObserver();
+                gmailObserver.registerSelf("zinetz.victor@gmail.com");
+            }
+        }
+
+        ServiceStarted = true;
+
+        return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        final ContentResolver cr = getApplicationContext().getContentResolver();
+        cr.unregisterContentObserver(callsEventsObserver);
+        callsEventsObserver = null;
+        cr.unregisterContentObserver(smsEventsObserver);
+        smsEventsObserver = null;
+
+        unregisterReceiver(timeEventsReceiver);
+        timeEventsReceiver = null;
+
+        if (Config.TESTING) {
+            cr.unregisterContentObserver(calendarObserver);
+            calendarObserver = null;
+
+            gmailObserver.unregisterSelf();
+            gmailObserver = null;
+        }
+
+        Config.Log("Broadcaster unregistered, service stopping");
+
+        ServiceStarted = false;
+        super.onDestroy();
+    }
+}

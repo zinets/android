@@ -1,0 +1,172 @@
+package info.hamster.widgets.analog_clock;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
+import android.widget.RemoteViews;
+import info.hamster.widgets.BaseWidgetProvider;
+import info.hamster.widgets.Config;
+import info.hamster.widgets.R;
+import info.hamster.widgets.wall_clock.WallClockConfig;
+
+import java.util.Calendar;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Zinetz Victor
+ * Date: 10.04.11
+ */
+public class AnalogClockWidget extends BaseWidgetProvider {
+
+    private static final int[] Dials = {
+            R.drawable.a_clock4, R.drawable.a_clock3, R.drawable.a_clock5, R.drawable.a_clock6
+    };
+
+    private static final int[] HandsM = {
+            0, 0, R.drawable.a_clock5_m, R.drawable.a_clock6_m
+    };
+
+    private static final int[] HandsH = {
+            0, 0, R.drawable.a_clock5_h, R.drawable.a_clock6_h
+    };
+    private static final int[] h_dx = {0, 0, -11, -4};
+    private static final int[] h_dy = {0, 0, -11, -10};
+    private static final int[] m_dx = {0, 0, -5, -4};
+    private static final int[] m_dy = {0, 0, -11, -10};
+
+    public void UpdateWidget(Context context) {
+
+        Config.Log("updating AnalogClockWidget");
+        Calendar curDateTime = Calendar.getInstance();
+
+        final ComponentName thisWidget = new ComponentName(context, AnalogClockWidget.class);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+        final RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.analog_clock);
+        final Resources r = context.getResources();
+        Bitmap bmp;
+        final int hh = curDateTime.get(Calendar.HOUR_OF_DAY);
+        final int mm = curDateTime.get(Calendar.MINUTE);
+
+        for (int appWidgetId : appWidgetIds) {
+            Config.Log("analogClock #" + appWidgetId);
+            int themeIndex = prefs.getInt(AnalogWidgetConfig.ThemePrefix + appWidgetId, 0);
+            switch (themeIndex) {
+                case 0: {
+                    // draw dial
+                    final Drawable dial = r.getDrawable(Dials[themeIndex]);
+                    final int w = dial.getIntrinsicWidth();
+                    final int h = dial.getIntrinsicHeight();
+                    dial.setBounds(0, 0, w, h);
+
+                    bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bmp);
+
+                    dial.draw(canvas);
+                    canvas.translate(w / 2, h / 2);
+
+                    final Drawable hand = r.getDrawable(R.drawable.a_clock3_h);
+                    hand.setBounds(0, 0, hand.getIntrinsicWidth(), hand.getIntrinsicHeight());
+                    canvas.rotate(hh / 24.0f * 360 + mm / 4 - 90);
+                    canvas.translate(-8, -10); // hand center
+                    hand.draw(canvas);
+
+                    remoteViews.setImageViewBitmap(R.id.idClockSection, bmp);
+
+                    break;
+                }
+                case 1: {
+                    final Drawable dial = r.getDrawable(R.drawable.a_clock4);
+                    final int w = dial.getIntrinsicWidth();
+                    final int h = dial.getIntrinsicHeight();
+                    dial.setBounds(0, 0, w, h);
+
+                    bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bmp);
+
+                    canvas.translate(w / 2, h / 2);
+                    canvas.save();
+                    canvas.rotate(-hh / 24.0f * 360 - mm / 4);
+                    canvas.translate(-w / 2, -h / 2);
+                    dial.draw(canvas);
+
+                    canvas.restore();
+                    final Drawable hand = r.getDrawable(R.drawable.a_clock3_h);
+                    hand.setBounds(0, 0, hand.getIntrinsicWidth(), hand.getIntrinsicHeight());
+                    canvas.rotate(-90);
+                    canvas.translate(-8, -11); // hand center
+                    hand.draw(canvas);
+
+                    remoteViews.setImageViewBitmap(R.id.idClockSection, bmp);
+
+                    break;
+                }
+                case 2:
+                case 3: {
+                    final Drawable dial = r.getDrawable(Dials[themeIndex]);
+                    final int w = dial.getIntrinsicWidth();
+                    final int h = dial.getIntrinsicHeight();
+                    dial.setBounds(0, 0, w, h);
+
+                    bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bmp);
+
+                    dial.draw(canvas);
+                    canvas.translate(w / 2, h / 2);
+                    canvas.save();
+
+                    Drawable hand = r.getDrawable(HandsM[themeIndex]);
+                    hand.setBounds(0, 0, hand.getIntrinsicWidth(), hand.getIntrinsicHeight());
+                    final float a = mm / 60.0f * 360;
+                    canvas.rotate(a - 180);
+                    canvas.translate(m_dx[themeIndex], m_dy[themeIndex]);
+                    hand.draw(canvas);
+
+                    canvas.restore();
+                    hand = r.getDrawable(HandsH[themeIndex]);
+                    hand.setBounds(0, 0, hand.getIntrinsicWidth(), hand.getIntrinsicHeight());
+                    canvas.rotate(hh / 12.0f * 360 + mm / 2 - 180);
+                    canvas.translate(h_dx[themeIndex], h_dy[themeIndex]); // hand center
+                    hand.draw(canvas);
+
+                    remoteViews.setImageViewBitmap(R.id.idClockSection, bmp);
+
+                    break;
+                }
+            }
+
+            String action = prefs.getString(AnalogWidgetConfig.ClockActionPrefix + appWidgetId, "");
+
+            if (!action.equals("")) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                ComponentName name = new ComponentName(action, prefs.getString(AnalogWidgetConfig.ClockActivityPrefix + appWidgetId, ""));
+
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                intent.setComponent(name);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                remoteViews.setOnClickPendingIntent(R.id.idClockSection, pendingIntent);
+            } else {
+                Intent intent = new Intent(context, AnalogWidgetConfig.class);
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                remoteViews.setOnClickPendingIntent(R.id.idClockSection, pendingIntent);
+            }
+
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
+        }
+        Config.Log("Analog widget Updated");
+    }
+}
