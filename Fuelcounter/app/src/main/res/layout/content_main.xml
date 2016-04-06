@@ -24,8 +24,9 @@
         android:inputType="numberDecimal"
         android:ems="10"
         android:id="@+id/idSumm"
+        android:hint="Сумма"
         android:layout_below="@+id/datePicker"
-        android:hint="Сумма" />
+        android:layout_alignEnd="@+id/datePicker" />
 
     <EditText
         android:layout_width="wrap_content"
